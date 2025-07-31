@@ -1,6 +1,6 @@
 import { createClient, type MicroCMSContentId, type MicroCMSDate } from 'microcms-js-sdk';
 
-export type Tag = {
+export type Folder = {
   name: string;
 } & MicroCMSContentId & MicroCMSDate;
 
@@ -8,7 +8,7 @@ export type Bookmark = {
   url: string;
   title: string;
   description: string;
-  tags: Tag[];
+  folder?: Folder; // フォルダは任意なので '?' をつけます
 } & MicroCMSContentId & MicroCMSDate;
 
 
@@ -24,12 +24,12 @@ export const client = createClient({
   apiKey: process.env.MICROCMS_API_KEY,
 });
 
-export const getTags = async () => {
-  const tags = await client.getList<Tag>({
-    endpoint: 'tags',
+export const getFolders = async () => {
+  const folders = await client.getList<Folder>({
+    endpoint: 'folders',
     queries: { limit: 100 },
   });
-  return tags.contents;
+  return folders.contents;
 };
 
 export const getBookmarks = async () => {
@@ -47,17 +47,4 @@ export const getBookmarkDetail = async (contentId: string) => {
     queries: { depth: 1 },
   });
   return bookmark;
-};
-
-export const getBookmarksByTag = async (tagId: string) => {
-  const bookmarks = await client.getList<Bookmark>({
-    endpoint: 'bookmarks',
-    queries: {
-      filters: `tags[contains]${tagId}`,
-      orders: '-createdAt',
-      limit: 100,
-      depth: 1,
-    },
-  });
-  return bookmarks.contents;
 };

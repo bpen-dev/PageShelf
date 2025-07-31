@@ -2,63 +2,37 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type Tag } from '@/libs/microcms';
+import { type Folder } from '@/libs/microcms'; // 👈 TagをFolderに変更
 import styles from './index.module.css';
 
 type Props = {
-  allTags: Tag[];
+  allFolders: Folder[]; // 👈 allTagsをallFoldersに変更
 };
 
-export default function BookmarkForm({ allTags }: Props) {
+export default function BookmarkForm({ allFolders }: Props) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [newTagName, setNewTagName] = useState(''); // 👈【追加点1】新しいタグ名用のstate
+  const [selectedFolder, setSelectedFolder] = useState(''); // 👈 selectedTagsをselectedFolderに変更
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingOgp, setIsFetchingOgp] = useState(false);
   const router = useRouter();
-
-  // URL入力欄からフォーカスが外れたときにOGPを取得する
-  const handleUrlBlur = async () => {
-    if (!url) return;
-    try {
-      setIsFetchingOgp(true);
-      const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
-      if (!response.ok) return;
-
-      const data = await response.json();
-      if (data.title) {
-        setTitle(data.title);
-      }
-    } catch (error) {
-      console.error('Failed to fetch OGP:', error);
-    } finally {
-      setIsFetchingOgp(false);
-    }
-  };
-
-  const handleTagChange = (tagId: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // 👇【追加点2】bodyに新しいタグ名(newTag)を追加
-      body: JSON.stringify({ url, title, description, tags: selectedTags, newTag: newTagName }),
+      // 👇 送信するデータをfolderに変更
+      body: JSON.stringify({ url, title, description, folder: selectedFolder || null }),
     });
+
     setIsLoading(false);
     setUrl('');
     setTitle('');
     setDescription('');
-    setSelectedTags([]);
-    setNewTagName(''); // 👈【追加点3】フォーム送信後に新しいタグ入力欄もクリア
+    setSelectedFolder(''); // 👈 クリアするstateを変更
     router.refresh();
   };
 
@@ -66,10 +40,10 @@ export default function BookmarkForm({ allTags }: Props) {
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.formGroup}>
         <label htmlFor="url" className={styles.label}>URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
+        <label htmlFor="title" className={styles.label}>タイトル</label>
         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
@@ -77,37 +51,26 @@ export default function BookmarkForm({ allTags }: Props) {
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
       </div>
       
+      {/* 👇 タグ選択をフォルダ選択のプルダウンに変更 */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>タグ</label>
-        <div className={styles.tagGroup}>
-          {allTags.map((tag) => (
-            <div key={tag.id} className={styles.tagItem}>
-              <input
-                type="checkbox"
-                id={tag.id}
-                value={tag.id}
-                checked={selectedTags.includes(tag.id)}
-                onChange={() => handleTagChange(tag.id)}
-              />
-              <label htmlFor={tag.id}>{tag.name}</label>
-            </div>
+        <label htmlFor="folder" className={styles.label}>フォルダ</label>
+        <select
+          id="folder"
+          value={selectedFolder}
+          onChange={(e) => setSelectedFolder(e.target.value)}
+          className={styles.input} // inputと同じスタイルを適用
+        >
+          <option value="">フォルダを選択...</option>
+          {allFolders.map((folder) => (
+            <option key={folder.id} value={folder.id}>
+              {folder.name}
+            </option>
           ))}
-        </div>
-      </div>
-      
-      <div className={styles.formGroup}>
-        <label htmlFor="new-tag" className={styles.label}>新しいタグを追加</label>
-        <input
-          type="text"
-          id="new-tag"
-          value={newTagName}
-          onChange={(e) => setNewTagName(e.target.value)}
-          className={styles.input}
-        />
+        </select>
       </div>
       
       <button type="submit" disabled={isLoading} className={styles.button}>
-        {isLoading ? '登録中...' : '登録'}
+        登録
       </button>
     </form>
   );

@@ -1,17 +1,17 @@
-import { getBookmarkDetail, getTags } from '@/libs/microcms'; 
+import { getBookmarkDetail, getFolders } from '@/libs/microcms';
 import EditBookmarkForm from '@/app/components/EditBookmarkForm';
 
 type Props = {
-  params: Promise<{ // 👈 params を Promise で囲む
+  params: Promise<{
     id: string;
   }>;
 };
 
-export default async function EditPage({ params: paramsPromise }: Props) { // 👈 propsの名前を変更
-  const params = await paramsPromise; // 👈 ここで await する
+export default async function EditPage({ params: paramsPromise }: Props) {
+  const params = await paramsPromise;
   const { id } = params;
   const bookmark = await getBookmarkDetail(id);
-  const allTags = await getTags(); 
+  const allFolders = await getFolders();
 
   if (!bookmark) {
     return <div>ブックマークが見つかりません。</div>;
@@ -20,7 +20,8 @@ export default async function EditPage({ params: paramsPromise }: Props) { // �
   return (
     <div>
       <h1>ブックマーク編集</h1>
-      <EditBookmarkForm bookmark={bookmark} allTags={allTags} />
+      
+      <EditBookmarkForm bookmark={bookmark} allFolders={allFolders} />
     </div>
   );
 }

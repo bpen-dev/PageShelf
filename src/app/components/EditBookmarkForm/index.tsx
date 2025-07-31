@@ -2,27 +2,25 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type Bookmark, type Tag } from '@/libs/microcms';
-import styles from './index.module.css'; // 👈 CSSモジュールをインポート
+import { type Bookmark, type Folder } from '@/libs/microcms';
+import styles from './index.module.css';
 
+// ★★★★★★★★★★★★★★★★★★★★★★★★
+// ★ ここの Props の定義がエラーの核心です ★
+// ★ allFolders が正しく定義されていることを確認してください ★
+// ★★★★★★★★★★★★★★★★★★★★★★★★
 type Props = {
   bookmark: Bookmark;
-  allTags: Tag[];
+  allFolders: Folder[];
 };
 
-export default function EditBookmarkForm({ bookmark, allTags }: Props) {
+export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
   const [url, setUrl] = useState(bookmark.url);
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description || '');
-  const [selectedTags, setSelectedTags] = useState<string[]>(bookmark.tags.map(tag => tag.id));
+  const [selectedFolder, setSelectedFolder] = useState(bookmark.folder?.id || '');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
-  const handleTagChange = (tagId: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
-  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +28,7 @@ export default function EditBookmarkForm({ bookmark, allTags }: Props) {
     await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description, tags: selectedTags }),
+      body: JSON.stringify({ url, title, description, folder: selectedFolder || null }),
     });
     setIsLoading(false);
     router.push('/');
@@ -66,26 +64,25 @@ export default function EditBookmarkForm({ bookmark, allTags }: Props) {
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>タグ</label>
-        <div className={styles.tagGroup}>
-          {allTags.map((tag) => (
-            <div key={tag.id} className={styles.tagItem}>
-              <input
-                type="checkbox"
-                id={`edit-${tag.id}`}
-                value={tag.id}
-                checked={selectedTags.includes(tag.id)}
-                onChange={() => handleTagChange(tag.id)}
-              />
-              <label htmlFor={`edit-${tag.id}`}>{tag.name}</label>
-            </div>
+        <label htmlFor="folder" className={styles.label}>フォルダ</label>
+        <select
+          id="folder"
+          value={selectedFolder}
+          onChange={(e) => setSelectedFolder(e.target.value)}
+          className={styles.input}
+        >
+          <option value="">フォルダを選択...</option>
+          {allFolders.map((folder) => (
+            <option key={folder.id} value={folder.id}>
+              {folder.name}
+            </option>
           ))}
-        </div>
+        </select>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
         <button type="submit" disabled={isLoading} className={styles.button}>
-          {isLoading ? '更新中...' : '更新'}
+          更新
         </button>
         <button type="button" onClick={handleDelete} disabled={isLoading} className={`${styles.button} ${styles.deleteButton}`}>
           削除
