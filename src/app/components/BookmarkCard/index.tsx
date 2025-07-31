@@ -17,7 +17,7 @@ type Props = {
 export default function BookmarkCard({ bookmark }: Props) {
   return (
     <article className={styles.card}>
-      <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className={styles.link}>
+      <div className={styles.link}>
         <h2 className={styles.title}>{bookmark.title}</h2>
         <p className={styles.url}>{bookmark.url}</p>
         <p className={styles.description}>{bookmark.description}</p>
@@ -28,7 +28,14 @@ export default function BookmarkCard({ bookmark }: Props) {
             </span>
           ))}
         </div>
-      </a>
+      </div>
+
+      <div className={styles.actions}>
+        <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className={styles.button}>サイトへ</a>
+        <Link href={`/bookmarks/${bookmark.id}/edit`} className={styles.button}>
+          編集
+        </Link>
+      </div>
     </article>
   );
 }

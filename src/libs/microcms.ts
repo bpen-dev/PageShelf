@@ -30,3 +30,12 @@ export const getBookmarks = async () => {
   });
   return bookmarks.contents;
 };
+
+// IDを指定してブックマークを1件取得
+export const getBookmarkDetail = async (contentId: string) => {
+  const bookmark = await client.get<Bookmark>({
+    endpoint: 'bookmarks',
+    contentId,
+  });
+  return bookmark;
+};
