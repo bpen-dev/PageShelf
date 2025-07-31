@@ -1,7 +1,8 @@
-import { getBookmarksByFolder, getUnclassifiedBookmarks } from '@/libs/microcms';
+import { getBookmarksByFolder, getUnclassifiedBookmarks, getFolders } from '@/libs/microcms';
 import BookmarkCard from '@/app/components/BookmarkCard';
-import styles from '@/app/page.module.css'; // トップページのスタイルを再利用
-import { type Bookmark } from '@/libs/microcms';
+import styles from '@/app/page.module.css';
+import { type Bookmark, type Folder } from '@/libs/microcms';
+import BookmarkForm from '@/app/components/BookmarkForm'; // 👈 BookmarkFormをインポート
 
 type Props = {
   params: {
@@ -11,17 +12,19 @@ type Props = {
 
 export default async function FolderPage({ params }: Props) {
   const { folderId } = params;
+  const allFolders = await getFolders();
 
-  // URLに応じて取得するデータを変える
   const bookmarks =
     folderId === 'unclassified'
       ? await getUnclassifiedBookmarks()
       : await getBookmarksByFolder(folderId);
 
-  // microCMSからフォルダ名を取得して表示すると、より親切になります（今回は省略）
-  const title =
+  const currentFolder = allFolders.find(folder => folder.id === folderId);
+  const title = 
     folderId === 'unclassified'
       ? '未分類のブックマーク'
+      : currentFolder
+      ? `${currentFolder.name} のブックマーク`
       : 'フォルダ内のブックマーク';
 
   return (
@@ -32,9 +35,18 @@ export default async function FolderPage({ params }: Props) {
           <p>このフォルダにはブックマークがありません。</p>
         ) : (
           bookmarks.map((bookmark: Bookmark) => (
-            <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+            <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
           ))
         )}
+      </div>
+
+      {/* 👇 フォルダ別ページにもフォームを追加 */}
+      <div className={styles.formContainer}>
+        {/* unclassified（未分類）の場合はcurrentFolderIdを渡さない */}
+        <BookmarkForm
+          allFolders={allFolders}
+          currentFolderId={folderId !== 'unclassified' ? folderId : undefined}
+        />
       </div>
     </>
   );
