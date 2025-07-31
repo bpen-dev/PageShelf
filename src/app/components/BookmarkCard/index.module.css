@@ -3,13 +3,12 @@
   border-radius: 8px;
   padding: 1rem;
   transition: box-shadow 0.2s;
+  display: flex; /* 追加 */
+  flex-direction: column; /* 追加 */
+  justify-content: space-between; /* 追加 */
 }
 .card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-.link {
-  text-decoration: none;
-  color: inherit;
 }
 .title {
   font-size: 1.2rem;
@@ -29,23 +28,22 @@
   color: #718096;
   margin-bottom: 1rem;
 }
-.tags {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.folderWrapper { /* tagsからfolderWrapperに変更 */
+  margin-top: auto; /* 追加 */
+  padding-top: 1rem; /* 追加 */
 }
-.tag {
+.folder { /* tagからfolderに変更 */
   font-size: 0.8rem;
-  background-color: #edf2f7;
-  padding: 0.2rem 0.5rem;
-  border-radius: 9999px;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
 }
 .actions {
   margin-top: 1rem;
   display: flex;
   gap: 0.5rem;
 }
-
 .button {
   display: inline-block;
   padding: 0.3rem 0.8rem;
