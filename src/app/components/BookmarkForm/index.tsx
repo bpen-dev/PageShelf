@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react'; 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Tag } from '@/libs/microcms';
 
@@ -13,8 +13,9 @@ export default function BookmarkForm({ allTags }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [newTagName, setNewTagName] = useState(''); // 👈【追加点1】新しいタグ名用のstate
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingOgp, setIsFetchingOgp] = useState(false); 
+  const [isFetchingOgp, setIsFetchingOgp] = useState(false);
   const router = useRouter();
 
   // URL入力欄からフォーカスが外れたときにOGPを取得する
@@ -48,13 +49,15 @@ export default function BookmarkForm({ allTags }: Props) {
     await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description, tags: selectedTags }),
+      // 👇【追加点2】bodyに新しいタグ名(newTag)を追加
+      body: JSON.stringify({ url, title, description, tags: selectedTags, newTag: newTagName }),
     });
     setIsLoading(false);
     setUrl('');
     setTitle('');
     setDescription('');
     setSelectedTags([]);
+    setNewTagName(''); // 👈【追加点3】フォーム送信後に新しいタグ入力欄もクリア
     router.refresh();
   };
 
@@ -62,7 +65,6 @@ export default function BookmarkForm({ allTags }: Props) {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="url">URL</label>
-        {/* onBlurイベントハンドラを追加 */}
         <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required />
       </div>
       <div>
@@ -90,6 +92,18 @@ export default function BookmarkForm({ allTags }: Props) {
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* 👇【追加点4】新しいタグを入力するフォームを追加 */}
+      <div style={{ marginTop: '1rem' }}>
+        <label htmlFor="new-tag">新しいタグ</label>
+        <input
+          type="text"
+          id="new-tag"
+          value={newTagName}
+          onChange={(e) => setNewTagName(e.target.value)}
+          placeholder="例: TypeScript"
+        />
       </div>
       
       <button type="submit" disabled={isLoading} style={{ marginTop: '1rem' }}>
