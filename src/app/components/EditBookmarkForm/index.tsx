@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Bookmark, type Tag } from '@/libs/microcms';
+import styles from './index.module.css'; // 👈 CSSモジュールをインポート
 
 type Props = {
   bookmark: Bookmark;
@@ -12,7 +13,7 @@ type Props = {
 export default function EditBookmarkForm({ bookmark, allTags }: Props) {
   const [url, setUrl] = useState(bookmark.url);
   const [title, setTitle] = useState(bookmark.title);
-  const [description, setDescription] = useState(bookmark.description);
+  const [description, setDescription] = useState(bookmark.description || '');
   const [selectedTags, setSelectedTags] = useState<string[]>(bookmark.tags.map(tag => tag.id));
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -50,25 +51,25 @@ export default function EditBookmarkForm({ bookmark, allTags }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="url">URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required />
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.formGroup}>
+        <label htmlFor="url" className={styles.label}>URL</label>
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required className={styles.input} />
       </div>
-      <div>
-        <label htmlFor="title">タイトル</label>
-        <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+      <div className={styles.formGroup}>
+        <label htmlFor="title" className={styles.label}>タイトル</label>
+        <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
-      <div>
-        <label htmlFor="description">メモ</label>
-        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <div className={styles.formGroup}>
+        <label htmlFor="description" className={styles.label}>メモ</label>
+        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
       </div>
 
-      <div>
-        <label>タグ</label>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>タグ</label>
+        <div className={styles.tagGroup}>
           {allTags.map((tag) => (
-            <div key={tag.id}>
+            <div key={tag.id} className={styles.tagItem}>
               <input
                 type="checkbox"
                 id={`edit-${tag.id}`}
@@ -83,10 +84,10 @@ export default function EditBookmarkForm({ bookmark, allTags }: Props) {
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading} className={styles.button}>
           {isLoading ? '更新中...' : '更新'}
         </button>
-        <button type="button" onClick={handleDelete} disabled={isLoading} style={{ backgroundColor: '#e53e3e', color: 'white' }}>
+        <button type="button" onClick={handleDelete} disabled={isLoading} className={`${styles.button} ${styles.deleteButton}`}>
           削除
         </button>
       </div>

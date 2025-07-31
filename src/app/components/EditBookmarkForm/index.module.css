@@ -63,7 +63,7 @@
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  align-self: flex-start; /* ボタンを左寄せにする */
+  align-self: flex-start;
 }
 
 .button:hover {
@@ -73,4 +73,12 @@
 .button:disabled {
   background-color: #a0aec0;
   cursor: not-allowed;
+}
+
+.deleteButton {
+  background-color: #e53e3e;
+}
+
+.deleteButton:hover {
+  background-color: #c53030;
 }

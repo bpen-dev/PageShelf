@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Tag } from '@/libs/microcms';
+import styles from './index.module.css';
 
 type Props = {
   allTags: Tag[];
@@ -62,25 +63,25 @@ export default function BookmarkForm({ allTags }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="url">URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required />
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <div className={styles.formGroup}>
+        <label htmlFor="url" className={styles.label}>URL</label>
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
       </div>
-      <div>
-        <label htmlFor="title">タイトル {isFetchingOgp && '(自動取得中...)'}</label>
-        <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+      <div className={styles.formGroup}>
+        <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
+        <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
-      <div>
-        <label htmlFor="description">メモ</label>
-        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <div className={styles.formGroup}>
+        <label htmlFor="description" className={styles.label}>メモ</label>
+        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
       </div>
       
-      <div>
-        <label>タグ</label>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className={styles.formGroup}>
+        <label className={styles.label}>タグ</label>
+        <div className={styles.tagGroup}>
           {allTags.map((tag) => (
-            <div key={tag.id}>
+            <div key={tag.id} className={styles.tagItem}>
               <input
                 type="checkbox"
                 id={tag.id}
@@ -94,19 +95,18 @@ export default function BookmarkForm({ allTags }: Props) {
         </div>
       </div>
       
-      {/* 👇【追加点4】新しいタグを入力するフォームを追加 */}
-      <div style={{ marginTop: '1rem' }}>
-        <label htmlFor="new-tag">新しいタグ</label>
+      <div className={styles.formGroup}>
+        <label htmlFor="new-tag" className={styles.label}>新しいタグを追加</label>
         <input
           type="text"
           id="new-tag"
           value={newTagName}
           onChange={(e) => setNewTagName(e.target.value)}
-          placeholder="例: TypeScript"
+          className={styles.input}
         />
       </div>
       
-      <button type="submit" disabled={isLoading} style={{ marginTop: '1rem' }}>
+      <button type="submit" disabled={isLoading} className={styles.button}>
         {isLoading ? '登録中...' : '登録'}
       </button>
     </form>
