@@ -6,22 +6,20 @@ import { type Bookmark } from '@/libs/microcms';
 
 export default async function Home() {
   const bookmarks = await getBookmarks();
-  const allFolders = await getFolders(); // 👈 allTagsをallFoldersに変更
+  const allFolders = await getFolders();
 
   return (
-    <main className={styles.main}>
-      <h1 className={styles.title}>My Bookmarks</h1>
-      
+    <>
+      <h1 className={styles.title}>すべてのブックマーク</h1>
       <div className={styles.formContainer}>
-        {/* フォームに全フォルダのデータを渡す */}
         <BookmarkForm allFolders={allFolders} /> 
       </div>
-
       <div className={styles.grid}>
         {bookmarks.map((bookmark: Bookmark) => (
-          <BookmarkCard key={bookmark.id} bookmark={bookmark} />
+          // 👇 allFoldersをBookmarkCardに渡す
+          <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
         ))}
       </div>
-    </main>
+    </>
   );
 }

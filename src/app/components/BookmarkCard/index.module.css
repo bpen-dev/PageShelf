@@ -56,3 +56,44 @@
 .button:hover {
   background-color: #f1f5f9;
 }
+.select {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0 0.5rem;
+  font-size: 0.9rem;
+  background-color: white;
+}
+
+.folderMenu {
+  position: relative; /* ドロップダウンを配置する基準点になります */
+}
+
+.dropdown {
+  position: absolute;
+  bottom: 100%; /* ボタンの真上に表示 */
+  right: 0;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  width: max-content; /* 中身の幅に合わせる */
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.dropdown ul {
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+.dropdownItem {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dropdownItem:hover {
+  background-color: #f1f5f9;
+}

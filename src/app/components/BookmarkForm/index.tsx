@@ -60,7 +60,7 @@ export default function BookmarkForm({ allFolders }: Props) {
           onChange={(e) => setSelectedFolder(e.target.value)}
           className={styles.input} // inputと同じスタイルを適用
         >
-          <option value="">フォルダを選択...</option>
+          <option value="">未分類</option>
           {allFolders.map((folder) => (
             <option key={folder.id} value={folder.id}>
               {folder.name}
