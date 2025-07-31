@@ -1,22 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; 
 import { useRouter } from 'next/navigation';
 import { type Tag } from '@/libs/microcms';
 
 type Props = {
-  allTags: Tag[]; // トップページから全タグのリストを受け取る
+  allTags: Tag[];
 };
 
 export default function BookmarkForm({ allTags }: Props) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]); // 選択されたタグIDを配列で管理
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingOgp, setIsFetchingOgp] = useState(false); 
   const router = useRouter();
 
-  // タグのチェックボックスが変更されたときの処理
+  // URL入力欄からフォーカスが外れたときにOGPを取得する
+  const handleUrlBlur = async () => {
+    if (!url) return;
+    try {
+      setIsFetchingOgp(true);
+      const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
+      if (!response.ok) return;
+
+      const data = await response.json();
+      if (data.title) {
+        setTitle(data.title);
+      }
+    } catch (error) {
+      console.error('Failed to fetch OGP:', error);
+    } finally {
+      setIsFetchingOgp(false);
+    }
+  };
+
   const handleTagChange = (tagId: string) => {
     setSelectedTags((prev) =>
       prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
@@ -26,16 +45,12 @@ export default function BookmarkForm({ allTags }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // 送信するデータにtagsを追加
       body: JSON.stringify({ url, title, description, tags: selectedTags }),
     });
-
     setIsLoading(false);
-    // フォームをクリア
     setUrl('');
     setTitle('');
     setDescription('');
@@ -47,18 +62,18 @@ export default function BookmarkForm({ allTags }: Props) {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="url">URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required />
+        {/* onBlurイベントハンドラを追加 */}
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required />
       </div>
       <div>
-        <label htmlFor="title">タイトル</label>
+        <label htmlFor="title">タイトル {isFetchingOgp && '(自動取得中...)'}</label>
         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
       <div>
         <label htmlFor="description">メモ</label>
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
-
-      {/* タグ選択のUI */}
+      
       <div>
         <label>タグ</label>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
@@ -76,7 +91,7 @@ export default function BookmarkForm({ allTags }: Props) {
           ))}
         </div>
       </div>
-
+      
       <button type="submit" disabled={isLoading} style={{ marginTop: '1rem' }}>
         {isLoading ? '登録中...' : '登録'}
       </button>
