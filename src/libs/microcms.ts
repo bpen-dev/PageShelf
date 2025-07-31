@@ -48,3 +48,31 @@ export const getBookmarkDetail = async (contentId: string) => {
   });
   return bookmark;
 };
+
+// フォルダIDでブックマークを絞り込み取得
+export const getBookmarksByFolder = async (folderId: string) => {
+  const bookmarks = await client.getList<Bookmark>({
+    endpoint: 'bookmarks',
+    queries: {
+      filters: `folder[equals]${folderId}`, // 👈 フォルダIDで絞り込み
+      orders: '-createdAt',
+      limit: 100,
+      depth: 1,
+    },
+  });
+  return bookmarks.contents;
+};
+
+// 未分類のブックマークを取得
+export const getUnclassifiedBookmarks = async () => {
+  const bookmarks = await client.getList<Bookmark>({
+    endpoint: 'bookmarks',
+    queries: {
+      filters: 'folder[not_exists]', // 👈 フォルダが未設定のものを取得
+      orders: '-createdAt',
+      limit: 100,
+      depth: 1,
+    },
+  });
+  return bookmarks.contents;
+};
