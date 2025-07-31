@@ -23,3 +23,21 @@ export async function PATCH(
     return NextResponse.json({ error: 'Failed to update bookmark' }, { status: 500 });
   }
 }
+
+// DELETEリクエストの処理
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = params.id;
+    await client.delete({
+      endpoint: 'bookmarks',
+      contentId: id,
+    });
+    // 削除が成功した場合、中身が空のレスポンスを返す
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete bookmark' }, { status: 500 });
+  }
+}
