@@ -2,15 +2,16 @@ import { getBookmarksByFolder, getUnclassifiedBookmarks, getFolders } from '@/li
 import BookmarkCard from '@/app/components/BookmarkCard';
 import styles from '@/app/page.module.css';
 import { type Bookmark, type Folder } from '@/libs/microcms';
-import BookmarkForm from '@/app/components/BookmarkForm'; // 👈 BookmarkFormをインポート
+import BookmarkForm from '@/app/components/BookmarkForm';
 
 type Props = {
-  params: {
+  params: Promise<{ // 👈 await対応
     folderId: string;
-  };
+  }>;
 };
 
-export default async function FolderPage({ params }: Props) {
+export default async function FolderPage({ params: paramsPromise }: Props) { // 👈 await対応
+  const params = await paramsPromise; // 👈 awaitする
   const { folderId } = params;
   const allFolders = await getFolders();
 
@@ -40,9 +41,7 @@ export default async function FolderPage({ params }: Props) {
         )}
       </div>
 
-      {/* 👇 フォルダ別ページにもフォームを追加 */}
       <div className={styles.formContainer}>
-        {/* unclassified（未分類）の場合はcurrentFolderIdを渡さない */}
         <BookmarkForm
           allFolders={allFolders}
           currentFolderId={folderId !== 'unclassified' ? folderId : undefined}
