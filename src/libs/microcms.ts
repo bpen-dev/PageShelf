@@ -76,3 +76,30 @@ export const getUnclassifiedBookmarks = async () => {
   });
   return bookmarks.contents;
 };
+
+// 新しいフォルダを作成する
+export const createFolder = async (name: string) => {
+  const newFolder = await client.create<Omit<Folder, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'>>({
+    endpoint: 'folders',
+    content: { name },
+  });
+  return newFolder;
+};
+
+// フォルダ名を更新する
+export const updateFolderName = async (id: string, name: string) => {
+  const updatedFolder = await client.update<Folder>({
+    endpoint: 'folders',
+    contentId: id,
+    content: { name },
+  });
+  return updatedFolder;
+};
+
+// フォルダを削除する
+export const deleteFolder = async (id: string) => {
+  await client.delete({
+    endpoint: 'folders',
+    contentId: id,
+  });
+};

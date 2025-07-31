@@ -29,3 +29,51 @@
   border-top: 1px solid #e2e8f0;
   margin: 1rem 0;
 }
+
+.folderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.folderItem .link {
+  flex: 1;
+}
+
+.folderActions {
+  display: flex;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.actionButton:hover {
+  opacity: 1;
+}
+
+.addFolderForm {
+  display: flex;
+  margin-top: 1.5rem;
+}
+
+.addFolderInput {
+  flex: 1;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px 0 0 6px;
+  padding: 0.5rem;
+}
+
+.addFolderButton {
+  border: 1px solid #e2e8f0;
+  border-left: none;
+  background-color: #f7fafc;
+  border-radius: 0 6px 6px 0;
+  padding: 0 0.75rem;
+  cursor: pointer;
+}
