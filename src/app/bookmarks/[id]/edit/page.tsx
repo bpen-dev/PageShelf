@@ -1,4 +1,5 @@
 import { getBookmarkDetail } from '@/libs/microcms';
+import EditBookmarkForm from '@/app/components/EditBookmarkForm';
 
 type Props = {
   params: {
@@ -17,13 +18,10 @@ export default async function EditPage({ params }: Props) {
   return (
     <div>
       <h1>ブックマーク編集</h1>
-      <p>編集するブックマークのID: {id}</p>
       
-      {/* 取得したデータを表示してみる */}
-      <h2>{bookmark.title}</h2>
-      <p>{bookmark.url}</p>
-      <p>{bookmark.description}</p>
-      
+      {/* 編集フォームに取得したデータを渡す */}
+      <EditBookmarkForm bookmark={bookmark} />
+
       {/* ここに、データが入力済みの編集フォームを後で置きます */}
     </div>
   );
