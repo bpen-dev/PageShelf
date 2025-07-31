@@ -1,14 +1,6 @@
 import Link from 'next/link';
 import styles from './index.module.css';
-
-// 表示するブックマークデータの型を仮で定義しておきます
-type Bookmark = {
-  id: string;
-  url: string;
-  title: string;
-  description: string;
-  tags: { id: string; name: string }[];
-};
+import { type Bookmark } from '@/libs/microcms';
 
 type Props = {
   bookmark: Bookmark;
@@ -23,9 +15,9 @@ export default function BookmarkCard({ bookmark }: Props) {
         <p className={styles.description}>{bookmark.description}</p>
         <div className={styles.tags}>
           {bookmark.tags.map((tag) => (
-            <span key={tag.id} className={styles.tag}>
-              #{tag.name}
-            </span>
+          <Link href={`/tags/${tag.id}`} key={tag.id} className={styles.tag}>
+            #{tag.name}
+          </Link>
           ))}
         </div>
       </div>

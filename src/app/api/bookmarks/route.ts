@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { client } from '@/libs/microcms';
 
-// POSTリクエストの処理
 export async function POST(request: NextRequest) {
   try {
     const json = await request.json();
@@ -11,7 +10,7 @@ export async function POST(request: NextRequest) {
         url: json.url,
         title: json.title,
         description: json.description,
-        // tagsはフェーズ2で実装
+        tags: json.tags, 
       },
     });
     return NextResponse.json(data, { status: 201 });

@@ -1,52 +1,50 @@
-'use client'; // フォームなのでClient Component
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type Bookmark } from '@/libs/microcms';
+import { type Bookmark, type Tag } from '@/libs/microcms';
 
 type Props = {
-  bookmark: Bookmark; // 編集対象のブックマークデータをPropsで受け取る
+  bookmark: Bookmark;
+  allTags: Tag[];
 };
 
-export default function EditBookmarkForm({ bookmark }: Props) {
-  // Propsで受け取ったデータで、各フォームの状態を初期化
+export default function EditBookmarkForm({ bookmark, allTags }: Props) {
   const [url, setUrl] = useState(bookmark.url);
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description);
+  const [selectedTags, setSelectedTags] = useState<string[]>(bookmark.tags.map(tag => tag.id));
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  const handleTagChange = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // 更新用のAPIを叩く
     await fetch(`/api/bookmarks/${bookmark.id}`, {
-      method: 'PATCH', // 部分的な更新なのでPATCHメソッドを使用
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description }),
+      body: JSON.stringify({ url, title, description, tags: selectedTags }),
     });
-
     setIsLoading(false);
-    // 更新が終わったら、トップページに戻る
     router.push('/');
-    router.refresh(); // サーバーのデータを再取得させる
+    router.refresh();
   };
   
   const handleDelete = async () => {
-    // 確認ダイアログを表示
     if (!window.confirm('本当にこのブックマークを削除しますか？')) {
-      return; // キャンセルされたら何もしない
+      return;
     }
-
     setIsLoading(true);
-
     await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'DELETE',
     });
-
     setIsLoading(false);
-    // 削除が終わったら、トップページに戻る
     router.push('/');
     router.refresh();
   };
@@ -64,6 +62,24 @@ export default function EditBookmarkForm({ bookmark }: Props) {
       <div>
         <label htmlFor="description">メモ</label>
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+      </div>
+
+      <div>
+        <label>タグ</label>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {allTags.map((tag) => (
+            <div key={tag.id}>
+              <input
+                type="checkbox"
+                id={`edit-${tag.id}`}
+                value={tag.id}
+                checked={selectedTags.includes(tag.id)}
+                onChange={() => handleTagChange(tag.id)}
+              />
+              <label htmlFor={`edit-${tag.id}`}>{tag.name}</label>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>

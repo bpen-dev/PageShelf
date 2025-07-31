@@ -2,13 +2,26 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { type Tag } from '@/libs/microcms';
 
-export default function BookmarkForm() {
+type Props = {
+  allTags: Tag[]; // トップページから全タグのリストを受け取る
+};
+
+export default function BookmarkForm({ allTags }: Props) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]); // 選択されたタグIDを配列で管理
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  // タグのチェックボックスが変更されたときの処理
+  const handleTagChange = (tagId: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +30,8 @@ export default function BookmarkForm() {
     await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description }),
+      // 送信するデータにtagsを追加
+      body: JSON.stringify({ url, title, description, tags: selectedTags }),
     });
 
     setIsLoading(false);
@@ -25,13 +39,12 @@ export default function BookmarkForm() {
     setUrl('');
     setTitle('');
     setDescription('');
-    // ページをリフレッシュして新しいブックマークを一覧に表示
-    router.refresh(); 
+    setSelectedTags([]);
+    router.refresh();
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* ...フォームの見た目は変更なし... */}
       <div>
         <label htmlFor="url">URL</label>
         <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required />
@@ -44,7 +57,27 @@ export default function BookmarkForm() {
         <label htmlFor="description">メモ</label>
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
-      <button type="submit" disabled={isLoading}>
+
+      {/* タグ選択のUI */}
+      <div>
+        <label>タグ</label>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {allTags.map((tag) => (
+            <div key={tag.id}>
+              <input
+                type="checkbox"
+                id={tag.id}
+                value={tag.id}
+                checked={selectedTags.includes(tag.id)}
+                onChange={() => handleTagChange(tag.id)}
+              />
+              <label htmlFor={tag.id}>{tag.name}</label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <button type="submit" disabled={isLoading} style={{ marginTop: '1rem' }}>
         {isLoading ? '登録中...' : '登録'}
       </button>
     </form>

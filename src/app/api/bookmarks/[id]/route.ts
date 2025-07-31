@@ -16,6 +16,7 @@ export async function PATCH(
         url: json.url,
         title: json.title,
         description: json.description,
+        tags: json.tags,
       },
     });
     return NextResponse.json(data, { status: 200 });
