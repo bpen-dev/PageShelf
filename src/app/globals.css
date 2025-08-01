@@ -1,5 +1,5 @@
 :root {
-  /* Color Palette */
+  /* Color Palette (変更なし) */
   --background: #f8f9fa;
   --foreground: #ffffff;
   --text-primary: #1a202c;
@@ -35,21 +35,34 @@ a {
   text-decoration: none;
 }
 
-/* --- ここからがレイアウトの重要な部分 --- */
 .container {
   display: flex;
+  height: 100vh;
 }
 
 .sidebar {
   width: 280px;
-  height: 100vh;
-  position: sticky; /* サイドバーを固定 */
-  top: 0;
-  flex-shrink: 0; /* サイドバーが縮まないようにする */
+  flex-shrink: 0;
 }
 
 .mainContent {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.scrollableArea {
+  flex: 1;
+  overflow-y: auto;
   padding: 2rem;
-  min-width: 0; /* ★★★★★ これがレイアウト崩れを防ぐ、最も重要な一行です！ ★★★★★ */
+}
+
+/* 👇 [修正点] paddingをよりコンパクトに調整 */
+.fixedFormArea {
+  flex-shrink: 0;
+  padding: 1rem 2rem; /* 上下の余白を 1.5rem から 1rem に変更 */
+  background-color: var(--background);
+  border-top: 1px solid var(--border-color);
 }

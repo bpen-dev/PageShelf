@@ -1,10 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { type Folder } from '@/libs/microcms';
+import toast from 'react-hot-toast';
 import styles from './index.module.css';
+import { FiPlus, FiLoader } from 'react-icons/fi';
+import Image from 'next/image';
+import { useDebounce } from '@/hooks/useDebounce';
+import { type Folder } from '@/libs/microcms'; // 👈 Folderの型をインポート（次のステップで使います）
 
+type OgpData = {
+  title: string;
+  favicon: string;
+};
+
+// 👇 Propsの型定義を修正
 type Props = {
   allFolders: Folder[];
   currentFolderId?: string;
@@ -12,107 +22,107 @@ type Props = {
 
 export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
   const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [selectedFolder, setSelectedFolder] = useState(currentFolderId || '');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isFetchingOgp, setIsFetchingOgp] = useState(false);
+  const [ogpData, setOgpData] = useState<OgpData | null>(null);
   const router = useRouter();
+  const debouncedUrl = useDebounce(url, 500);
 
-  const handleUrlBlur = async () => {
-    if (!url || title) return;
-    try {
-      setIsFetchingOgp(true);
-      const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
-      if (!response.ok) return;
-
-      const data = await response.json();
-      if (data.title) {
-        setTitle(data.title);
-      }
-    } catch (error) {
-      console.error('Failed to fetch OGP:', error);
-    } finally {
-      setIsFetchingOgp(false);
+  useEffect(() => {
+    const isValidUrl = debouncedUrl && (debouncedUrl.startsWith('http://') || debouncedUrl.startsWith('https://'));
+    
+    if (!isValidUrl) {
+      setOgpData(null);
+      return;
     }
-  };
+
+    const fetchOgp = async () => {
+      setIsLoading(true);
+      setOgpData(null);
+      try {
+        const response = await fetch(`/api/ogp?url=${encodeURIComponent(debouncedUrl)}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || '情報の取得に失敗しました');
+        }
+
+        const data: OgpData = await response.json();
+        setOgpData(data);
+      } catch (error) {
+        console.error(error);
+        // 👇 [修正点] ここでtoastを使ってエラーメッセージを表示します
+        if (error instanceof Error) {
+          toast.error(error.message);
+        }
+        setOgpData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOgp();
+  }, [debouncedUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!ogpData) {
+      toast.error('有効なURLを読み込んでから追加してください。');
+      return;
+    }
+
     setIsLoading(true);
-    setIsSuccess(false);
 
     const response = await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description, folder: selectedFolder || null }),
+      body: JSON.stringify({ 
+        url: debouncedUrl, 
+        title: ogpData.title,
+        description: '',
+        folder: currentFolderId || null
+      }),
     });
 
     setIsLoading(false);
 
     if (response.ok) {
-      setIsSuccess(true);
+      toast.success('ブックマークを追加しました！');
       setUrl('');
-      setTitle('');
-      setDescription('');
-      if (!currentFolderId) {
-        setSelectedFolder('');
-      }
+      setOgpData(null);
       router.refresh();
-
-      setTimeout(() => {
-        setIsSuccess(false);
-      }, 3000);
     } else {
-      alert('登録に失敗しました。');
+      const errorData = await response.json();
+      toast.error(errorData.error || '登録に失敗しました。');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <h2 className={styles.formTitle}>ブックマークを追加</h2>
-      
-      {isSuccess && (
-        <p className={styles.successMessage}>
-          ブックマークを登録しました！
-        </p>
+    <div className={styles.container}>
+      {ogpData && !isLoading && (
+        <div className={styles.previewCard}>
+          <Image src={ogpData.favicon} width={24} height={24} alt="" className={styles.previewFavicon} />
+          <span className={styles.previewTitle}>{ogpData.title}</span>
+        </div>
       )}
-
-      <div className={styles.formGroup}>
-        <label htmlFor="url" className={styles.label}>URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
-        <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
-      </div>
-      <div className={styles.formGroup}>
-        <label htmlFor="description" className={styles.label}>メモ</label>
-        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
-      </div>
-      
-      <div className={styles.formGroup}>
-        <label htmlFor="folder" className={styles.label}>フォルダ</label>
-        <select
-          id="folder"
-          value={selectedFolder}
-          onChange={(e) => setSelectedFolder(e.target.value)}
-          disabled={!!currentFolderId}
-          className={styles.input}
-        >
-          <option value="">フォルダを選択...</option>
-          {allFolders.map((folder) => (
-            <option key={folder.id} value={folder.id}>
-              {folder.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      
-      <button type="submit" disabled={isLoading} className={styles.button}>
-        登録
-      </button>
-    </form>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.inputWrapper}>
+          <FiPlus className={styles.icon} />
+          <input
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className={styles.input}
+            placeholder="ブックマークしたいURLをペースト..."
+            disabled={isLoading && !ogpData}
+          />
+          {isLoading && <FiLoader className={`${styles.icon} ${styles.loader}`} />}
+          {ogpData && !isLoading && (
+            <button type="submit" disabled={isLoading} className={styles.addButton}>
+              追加
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }

@@ -32,9 +32,10 @@ export default async function RootLayout({
             <aside className="sidebar">
               <Sidebar allFolders={allFolders} />
             </aside>
-            <main className="mainContent">
-              {children}
-            </main>
+            {/* 👇 [修正点] mainContentの使い方が変わります */}
+            <div className="mainContent">
+              {children} {/* ここに各ページコンポーネントが展開される */}
+            </div>
           </div>
         </AuthProvider>
       </body>

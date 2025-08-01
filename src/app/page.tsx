@@ -6,13 +6,13 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from './api/auth/[...nextauth]/route';
 
 export default async function Home() {
-  const session = await getServerSession(authOptions); // 👈 セッションを取得
-  const bookmarks = await getBookmarks(session); // 👈 sessionを渡す
-  const allFolders = await getFolders(session); // 👈 sessionを渡す
+  const session = await getServerSession(authOptions);
+  const bookmarks = await getBookmarks(session);
+  const allFolders = await getFolders(session);
 
   if (!session) {
     return (
-      <div>
+      <div className="scrollableArea">
         <h1 className={styles.title}>ようこそ！</h1>
         <p>ログインすると、ブックマークの管理ができます。</p>
       </div>
@@ -21,13 +21,16 @@ export default async function Home() {
 
   return (
     <>
-      <h1 className={styles.title}>すべてのブックマーク</h1>
-      <div className={styles.listContainer}>
-        {bookmarks.map((bookmark: Bookmark) => (
-          <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
-        ))}
+      <div className="scrollableArea">
+        <h1 className={styles.title}>すべてのブックマーク</h1>
+        <div className={styles.listContainer}>
+          {bookmarks.map((bookmark: Bookmark) => (
+            <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
+          ))}
+        </div>
       </div>
-      <div className={styles.formContainer}>
+
+      <div className="fixedFormArea">
         <BookmarkForm allFolders={allFolders} /> 
       </div>
     </>

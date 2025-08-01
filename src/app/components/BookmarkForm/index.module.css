@@ -1,78 +1,96 @@
+/* 👇 [修正点] スタイルを全面的に刷新 */
+.container {
+  display: flex;
+  flex-direction: column-reverse; /* プレビューを上に表示 */
+  gap: 0.75rem;
+}
+
 .form {
-  background-color: #f7fafc;
-  border: 1px solid #e2e8f0;
+  width: 100%;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  z-index: 1;
+}
+
+.loader {
+  animation: spin 1s linear infinite;
+  right: 1rem;
+  left: auto;
+}
+
+@keyframes spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.formTitle {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-.successMessage {
-  background-color: #c6f6d5;
-  color: #2f855a;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  text-align: center;
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-}
-
-.label {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.input,
-.textarea {
-  padding: 0.75rem;
-  border: 1px solid #cbd5e0;
-  border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s, box-shadow 0.2s;
+  height: 44px;
+  background-color: var(--foreground);
 }
 
-.input:focus,
-.textarea:focus {
+.input:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.3);
 }
 
-.textarea {
-  min-height: 80px;
-  resize: vertical;
+.previewCard {
+  background-color: var(--foreground);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  border: 1px solid var(--border-color);
 }
 
-.button {
-  background-color: #3182ce;
+.previewFavicon {
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.previewTitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.addButton {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--primary-color);
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  font-weight: bold;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-  align-self: flex-start; /* ボタンを左寄せにする */
+  height: calc(100% - 12px);
 }
 
-.button:hover {
-  background-color: #2b6cb0;
-}
-
-.button:disabled {
-  background-color: #a0aec0;
-  cursor: not-allowed;
+.addButton:hover {
+  background-color: var(--primary-color-hover);
 }

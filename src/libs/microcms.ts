@@ -6,7 +6,6 @@ type FolderContent = {
   name: string;
   userId: string;
 };
-
 // microCMSのシステムフィールドを含んだ、最終的なフォルダの型
 export type Folder = FolderContent & MicroCMSContentId & MicroCMSDate;
 
@@ -19,10 +18,8 @@ export type BookmarkContent = {
   color?: 'red' | 'blue' | 'green' | 'yellow' | 'gray';
   userId: string;
 };
-
 // microCMSのシステムフィールドを含んだ、最終的なブックマークの型
 export type Bookmark = BookmarkContent & MicroCMSContentId & MicroCMSDate;
-
 
 if (!process.env.MICROCMS_SERVICE_DOMAIN) {
   throw new Error('MICROCMS_SERVICE_DOMAIN is required');
@@ -44,7 +41,6 @@ export const createFolder = async (name: string, userId: string) => {
   });
   return newFolder;
 };
-
 export const updateFolderName = async (id: string, name: string) => {
   const updatedFolder = await client.update<Partial<FolderContent>>({
     endpoint: 'folders',
@@ -53,7 +49,6 @@ export const updateFolderName = async (id: string, name: string) => {
   });
   return updatedFolder;
 };
-
 export const deleteFolder = async (id: string) => {
   await client.delete({
     endpoint: 'folders',
@@ -61,8 +56,7 @@ export const deleteFolder = async (id: string) => {
   });
 };
 
-
-// --- これ以降の関数はユーザー情報で絞り込む ---
+// --- データ取得用の関数 ---
 export const getFolders = async (session: Session | null) => {
   if (!session || !session.user?.email) return [];
   const folders = await client.getList<Folder>({
@@ -74,7 +68,6 @@ export const getFolders = async (session: Session | null) => {
   });
   return folders.contents;
 };
-
 export const getBookmarks = async (session: Session | null) => {
   if (!session || !session.user?.email) return [];
   const bookmarks = await client.getList<Bookmark>({
@@ -88,7 +81,6 @@ export const getBookmarks = async (session: Session | null) => {
   });
   return bookmarks.contents;
 };
-
 export const getBookmarkDetail = async (contentId: string, session: Session | null) => {
   if (!session || !session.user?.email) return null;
   const bookmark = await client.get<Bookmark>({
@@ -101,7 +93,6 @@ export const getBookmarkDetail = async (contentId: string, session: Session | nu
   });
   return bookmark;
 };
-
 export const getBookmarksByFolder = async (folderId: string, session: Session | null) => {
   if (!session || !session.user?.email) return [];
   const bookmarks = await client.getList<Bookmark>({
@@ -115,7 +106,6 @@ export const getBookmarksByFolder = async (folderId: string, session: Session | 
   });
   return bookmarks.contents;
 };
-
 export const getUnclassifiedBookmarks = async (session: Session | null) => {
   if (!session || !session.user?.email) return [];
   const bookmarks = await client.getList<Bookmark>({
