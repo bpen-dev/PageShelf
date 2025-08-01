@@ -5,10 +5,7 @@ import { useRouter } from 'next/navigation';
 import { type Bookmark, type Folder } from '@/libs/microcms';
 import styles from './index.module.css';
 
-// ★★★★★★★★★★★★★★★★★★★★★★★★
-// ★ ここの Props の定義がエラーの核心です ★
-// ★ allFolders が正しく定義されていることを確認してください ★
-// ★★★★★★★★★★★★★★★★★★★★★★★★
+
 type Props = {
   bookmark: Bookmark;
   allFolders: Folder[];
@@ -20,7 +17,26 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
   const [description, setDescription] = useState(bookmark.description || '');
   const [selectedFolder, setSelectedFolder] = useState(bookmark.folder?.id || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingOgp, setIsFetchingOgp] = useState(false); // 👈 追加
   const router = useRouter();
+
+  // 👇 OGP取得関数を追加
+  const handleUrlBlur = async () => {
+    if (!url) return;
+    try {
+      setIsFetchingOgp(true);
+      const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.title) {
+        setTitle(data.title);
+      }
+    } catch (error) {
+      console.error('Failed to fetch OGP:', error);
+    } finally {
+      setIsFetchingOgp(false);
+    }
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +68,10 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.formGroup}>
         <label htmlFor="url" className={styles.label}>URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required className={styles.input} />
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>タイトル</label>
+        <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>

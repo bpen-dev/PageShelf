@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Folder } from '@/libs/microcms';
 import styles from './index.module.css';
 
 type Props = {
   allFolders: Folder[];
-  // 👇 現在表示しているフォルダのIDを受け取れるようにする（任意）
   currentFolderId?: string;
 };
 
@@ -15,14 +14,29 @@ export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  // 👇 currentFolderIdがあれば、それを初期値にする
   const [selectedFolder, setSelectedFolder] = useState(currentFolderId || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingOgp, setIsFetchingOgp] = useState(false); // 👈 OGP取得中フラグを復活
   const router = useRouter();
 
-  // OGP取得機能は一旦コメントアウトして、後で復活させましょう
-  // const [isFetchingOgp, setIsFetchingOgp] = useState(false);
-  // const handleUrlBlur = async () => { ... };
+  // 👇 OGP取得関数を復活
+  const handleUrlBlur = async () => {
+    if (!url || title) return; // URLが空、または既にタイトルがある場合は何もしない
+    try {
+      setIsFetchingOgp(true);
+      const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
+      if (!response.ok) return;
+
+      const data = await response.json();
+      if (data.title) {
+        setTitle(data.title);
+      }
+    } catch (error) {
+      console.error('Failed to fetch OGP:', error);
+    } finally {
+      setIsFetchingOgp(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +52,6 @@ export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
     setUrl('');
     setTitle('');
     setDescription('');
-    // フォルダページの場合は、選択を維持する
     if (!currentFolderId) {
       setSelectedFolder('');
     }
@@ -50,10 +63,12 @@ export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
       <h2 className={styles.formTitle}>ブックマークを追加</h2>
       <div className={styles.formGroup}>
         <label htmlFor="url" className={styles.label}>URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required className={styles.input} />
+        {/* onBlurイベントハンドラを復活 */}
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>タイトル</label>
+        {/* OGP取得中の表示を復活 */}
+        <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
@@ -67,7 +82,6 @@ export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
           id="folder"
           value={selectedFolder}
           onChange={(e) => setSelectedFolder(e.target.value)}
-          // 👇 フォルダページの場合は選択を無効化する
           disabled={!!currentFolderId}
           className={styles.input}
         >
