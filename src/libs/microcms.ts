@@ -119,14 +119,5 @@ export const getUnclassifiedBookmarks = async (session: Session | null) => {
   });
   return bookmarks.contents;
 };
-export const getDefaultFolderId = async (session: Session | null) => {
-  if (!session || !session.user?.email) return null;
-  const folders = await client.getList<Folder>({
-    endpoint: 'folders',
-    queries: {
-      filters: `name[equals]Default[and]userId[equals]${session.user.email}`,
-      limit: 1,
-    },
-  });
-  return folders.contents[0]?.id || null;
-};
+
+// getDefaultFolderId関数は不要になったので削除

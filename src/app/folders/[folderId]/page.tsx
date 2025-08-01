@@ -45,7 +45,7 @@ export default async function FolderPage({ params: paramsPromise }: Props) {
         {bookmarks.length === 0 ? (
           <div className={emptyStateStyles.emptyState}>
             <FiInbox size={48} className={emptyStateStyles.icon} />
-            <h2 className={emptyStateStyles.title}>まだブックマークがありません</h2>
+            <h2 className={emptyStateStyles.title}>このフォルダにはブックマークがありません</h2>
             <p className={emptyStateStyles.text}>下のフォームから最初のブックマークを追加してみましょう！</p>
           </div>
         ) : (

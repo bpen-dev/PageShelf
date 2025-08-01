@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client, updateFolderName, deleteFolder, getDefaultFolderId } from '@/libs/microcms';
+import { client, updateFolderName, deleteFolder } from '@/libs/microcms';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
@@ -56,36 +56,35 @@ export async function DELETE(
   }
   
   try {
-    // 1. DefaultフォルダのIDを取得する
-    const defaultFolderId = await getDefaultFolderId(session);
-    if (!defaultFolderId) {
-      return NextResponse.json({ error: 'Defaultフォルダが見つかりません' }, { status: 500 });
-    }
-
-    // 2. 削除対象のフォルダに属するブックマークを全て取得する
+    // 1. 削除対象のフォルダに属するブックマークを全て取得する
     const bookmarksToUpdate = await client.getList({
       endpoint: 'bookmarks',
       queries: {
         filters: `folder[equals]${folderIdToDelete}`,
         limit: 100,
-        fields: 'id',
+        fields: 'id,url,title,description,color,userId',
       },
     });
 
-    // 3. 取得した各ブックマークのfolderをDefaultフォルダのIDにする
+    // 2. 取得した各ブックマークのfolderをnull(未分類)にする
     await Promise.all(
       bookmarksToUpdate.contents.map((bookmark) =>
         client.update({
           endpoint: 'bookmarks',
           contentId: bookmark.id,
           content: {
-            folder: defaultFolderId,
+            url: bookmark.url,
+            title: bookmark.title,
+            description: bookmark.description,
+            color: bookmark.color,
+            userId: bookmark.userId,
+            folder: null, // 👈 [修正点] DefaultフォルダIDではなく、nullを設定
           },
         })
       )
     );
 
-    // 4. ブックマークの移動が完了したら、フォルダ自体を削除する
+    // 3. ブックマークの移動が完了したら、フォルダ自体を削除する
     await deleteFolder(folderIdToDelete);
     
     return new NextResponse(null, { status: 204 });
