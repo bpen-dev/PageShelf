@@ -16,12 +16,12 @@ export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
   const [description, setDescription] = useState('');
   const [selectedFolder, setSelectedFolder] = useState(currentFolderId || '');
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingOgp, setIsFetchingOgp] = useState(false); // 👈 OGP取得中フラグを復活
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isFetchingOgp, setIsFetchingOgp] = useState(false);
   const router = useRouter();
 
-  // 👇 OGP取得関数を復活
   const handleUrlBlur = async () => {
-    if (!url || title) return; // URLが空、または既にタイトルがある場合は何もしない
+    if (!url || title) return;
     try {
       setIsFetchingOgp(true);
       const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
@@ -41,33 +41,49 @@ export default function BookmarkForm({ allFolders, currentFolderId }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setIsSuccess(false);
 
-    await fetch('/api/bookmarks', {
+    const response = await fetch('/api/bookmarks', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url, title, description, folder: selectedFolder || null }),
     });
 
     setIsLoading(false);
-    setUrl('');
-    setTitle('');
-    setDescription('');
-    if (!currentFolderId) {
-      setSelectedFolder('');
+
+    if (response.ok) {
+      setIsSuccess(true);
+      setUrl('');
+      setTitle('');
+      setDescription('');
+      if (!currentFolderId) {
+        setSelectedFolder('');
+      }
+      router.refresh();
+
+      setTimeout(() => {
+        setIsSuccess(false);
+      }, 3000);
+    } else {
+      alert('登録に失敗しました。');
     }
-    router.refresh();
   };
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <h2 className={styles.formTitle}>ブックマークを追加</h2>
+      
+      {isSuccess && (
+        <p className={styles.successMessage}>
+          ブックマークを登録しました！
+        </p>
+      )}
+
       <div className={styles.formGroup}>
         <label htmlFor="url" className={styles.label}>URL</label>
-        {/* onBlurイベントハンドラを復活 */}
         <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
-        {/* OGP取得中の表示を復活 */}
         <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
