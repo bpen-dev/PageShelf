@@ -3,7 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import { getFolders } from "@/libs/microcms";
-import AuthProvider from "./components/AuthProvider"; // 👈 AuthProviderをインポート
+import AuthProvider from "./components/AuthProvider";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./api/auth/[...nextauth]/route";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,19 +19,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const allFolders = await getFolders();
+  const session = await getServerSession(authOptions); // 👈 セッションを取得
+  const allFolders = await getFolders(session); // 👈 取得したセッションを渡す
 
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <AuthProvider> {/* 👈 AuthProviderで全体を囲む */}
+        <AuthProvider>
           <div style={{ display: 'flex' }}>
             <Sidebar allFolders={allFolders} />
             <main style={{ flex: 1, padding: '2rem' }}>
               {children}
             </main>
           </div>
-        </AuthProvider> {/* 👈 AuthProviderで全体を囲む */}
+        </AuthProvider>
       </body>
     </html>
   );
