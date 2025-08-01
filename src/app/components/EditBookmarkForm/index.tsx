@@ -4,18 +4,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Bookmark, type Folder } from '@/libs/microcms';
 import styles from './index.module.css';
+import toast from 'react-hot-toast';
 
 type Props = {
   bookmark: Bookmark;
   allFolders: Folder[];
+  onClose: () => void;
 };
 
-export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
+export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Props) {
   const [url, setUrl] = useState(bookmark.url);
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description || '');
   const [selectedFolder, setSelectedFolder] = useState(bookmark.folder?.id || '');
-  const [color, setColor] = useState(bookmark.color || ''); // 👈 色用のstateを追加
+  const [color, setColor] = useState(bookmark.color?.[0] || '');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -25,11 +27,11 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
     await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      // 👇 bodyにcolorを追加
-      body: JSON.stringify({ url, title, description, folder: selectedFolder || null, color }),
+      body: JSON.stringify({ url, title, description, folder: selectedFolder || null, color: color || null }),
     });
     setIsLoading(false);
-    router.push('/');
+    toast.success('更新しました');
+    onClose();
     router.refresh();
   };
   
@@ -42,7 +44,8 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
       method: 'DELETE',
     });
     setIsLoading(false);
-    router.push('/');
+    toast.success('削除しました');
+    onClose();
     router.refresh();
   };
 
@@ -78,32 +81,47 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
         </select>
       </div>
 
-      {/* 👇 色選択用のラジオボタンを追加 */}
       <div className={styles.formGroup}>
         <label className={styles.label}>カラー</label>
         <div className={styles.colorGroup}>
+          {/* 👇 [修正点1] 「色なし」のラジオボタンを追加 */}
+          <div className={styles.colorItem}>
+            <input
+              type="radio"
+              id="color-edit-none"
+              name="color"
+              value=""
+              checked={color === ''}
+              onChange={(e) => setColor(e.target.value)}
+            />
+            <label htmlFor="color-edit-none" className={`${styles.colorLabel} ${styles.noColor}`}></label>
+          </div>
           {['red', 'blue', 'green', 'yellow', 'gray'].map((c) => (
             <div key={c} className={styles.colorItem}>
               <input
                 type="radio"
-                id={`color-${c}`}
+                id={`color-edit-${c}`}
                 name="color"
                 value={c}
                 checked={color === c}
                 onChange={(e) => setColor(e.target.value)}
               />
-              <label htmlFor={`color-${c}`} className={`${styles.colorLabel} ${styles[c]}`}></label>
+              <label htmlFor={`color-edit-${c}`} className={`${styles.colorLabel} ${styles[c]}`}></label>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-        <button type="submit" disabled={isLoading} className={styles.button}>
-          更新
+      <div className={styles.actions}>
+        {/* 👇 [修正点2] キャンセルボタンのデザインを変更 */}
+        <button type="button" onClick={onClose} className={styles.cancelButton}>
+          キャンセル
         </button>
         <button type="button" onClick={handleDelete} disabled={isLoading} className={`${styles.button} ${styles.deleteButton}`}>
           削除
+        </button>
+        <button type="submit" disabled={isLoading} className={styles.button}>
+          {isLoading ? '保存中...' : '保存'}
         </button>
       </div>
     </form>
