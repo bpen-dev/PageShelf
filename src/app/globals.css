@@ -1,6 +1,6 @@
 :root {
   /* Color Palette (変更なし) */
-  --background: #f8f9fa;
+  --background: lab(95% 0 -0.01);
   --foreground: #ffffff;
   --text-primary: #1a202c;
   --text-secondary: #718096;
@@ -53,16 +53,24 @@ a {
   height: 100vh;
 }
 
+/* 👇 [修正点] paddingをよりコンパクトに調整 */
+.fixedHeader {
+  flex-shrink: 0;
+  padding: 1rem 2rem; /* 上下の余白を 1.5rem から 1rem に変更 */
+  background-color: var(--foreground);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 20;
+}
+
 .scrollableArea {
   flex: 1;
   overflow-y: auto;
   padding: 2rem;
 }
 
-/* 👇 [修正点] paddingをよりコンパクトに調整 */
 .fixedFormArea {
   flex-shrink: 0;
-  padding: 1rem 2rem; /* 上下の余白を 1.5rem から 1rem に変更 */
+  padding: 1rem 2rem;
   background-color: var(--background);
   border-top: 1px solid var(--border-color);
 }

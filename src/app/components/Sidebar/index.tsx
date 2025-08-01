@@ -7,7 +7,7 @@ import { type Folder } from '@/libs/microcms';
 import styles from './index.module.css';
 import AuthButton from '../AuthButton';
 import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
-import toast from 'react-hot-toast'; // 👈 toastをインポート
+import toast from 'react-hot-toast';
 
 type Props = {
   allFolders: Folder[];
@@ -33,7 +33,7 @@ export default function Sidebar({ allFolders }: Props) {
     const newFolder = await res.json();
     setFolders([...folders, newFolder]);
     setNewFolderName('');
-    toast.success(`「${newFolder.name}」を作成しました`); // 👈 通知を追加
+    toast.success(`「${newFolder.name}」を作成しました`);
     router.refresh();
   };
 
@@ -47,17 +47,22 @@ export default function Sidebar({ allFolders }: Props) {
     });
     const updatedFolder = await res.json();
     setFolders(folders.map(f => (f.id === id ? updatedFolder : f)));
-    toast.success(`「${newName}」に名前を変更しました`); // 👈 通知を追加
+    toast.success(`「${newName}」に名前を変更しました`);
     router.refresh();
   };
   
   const handleDeleteFolder = async (id: string, name: string) => {
+    if (name === 'Default') {
+      alert('Defaultフォルダは削除できません。');
+      return;
+    }
     if (!window.confirm(`「${name}」フォルダを削除しますか？中のブックマークは「未分類」に移動します。`)) return;
     await fetch(`/api/folders/${id}`, {
       method: 'DELETE',
     });
     setFolders(folders.filter(f => f.id !== id));
-    toast.success(`「${name}」を削除しました`); // 👈 通知を追加
+    toast.success(`「${name}」を削除しました`);
+    router.push('/'); // トップページ（すべてのブックマーク）に移動
     router.refresh();
   };
 
@@ -65,9 +70,10 @@ export default function Sidebar({ allFolders }: Props) {
     <aside className={styles.sidebar}>
       <div className={styles.authContainer}><AuthButton /></div>
       <nav>
+        {/* 👇 [復活] すべてのブックマーク と 未分類 */}
         <ul className={styles.list}>
           <li><Link href="/" className={styles.link}><FiHome />すべてのブックマーク</Link></li>
-          <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li>
+          {/* <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li> */}
         </ul>
         <hr className={styles.divider} />
         <ul className={styles.list}>

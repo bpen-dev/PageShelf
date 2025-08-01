@@ -1,13 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client, updateFolderName, deleteFolder } from '@/libs/microcms';
+import { client, updateFolderName, deleteFolder, getDefaultFolderId } from '@/libs/microcms';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
-// PATCH function (no changes here)
+// フォルダの所有者かを確認するヘルパー関数
+async function checkFolderOwnership(folderId: string, userEmail: string) {
+  try {
+    const folder = await client.get({ endpoint: 'folders', contentId: folderId });
+    return folder.userId === userEmail;
+  } catch (error) {
+    return false;
+  }
+}
+
+// フォルダ名を更新 (PATCH)
 export async function PATCH(
   request: NextRequest,
   { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.email) {
+    return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
+  }
+
+  const params = await paramsPromise;
+  const isOwner = await checkFolderOwnership(params.id, session.user.email);
+  if (!isOwner) {
+    return NextResponse.json({ error: '権限がありません' }, { status: 403 });
+  }
+
   try {
-    const params = await paramsPromise;
     const { name } = await request.json();
     const data = await updateFolderName(params.id, name);
     return NextResponse.json(data, { status: 200 });
@@ -16,41 +38,56 @@ export async function PATCH(
   }
 }
 
-// DELETE function (this is where the fix is)
+// フォルダを削除 (DELETE)
 export async function DELETE(
   request: NextRequest,
   { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const params = await paramsPromise;
-    const folderId = params.id;
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.email) {
+    return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
+  }
 
-    // 1. Get all bookmarks in the folder to be deleted.
+  const params = await paramsPromise;
+  const folderIdToDelete = params.id;
+  const isOwner = await checkFolderOwnership(folderIdToDelete, session.user.email);
+  if (!isOwner) {
+    return NextResponse.json({ error: '権限がありません' }, { status: 403 });
+  }
+  
+  try {
+    // 1. DefaultフォルダのIDを取得する
+    const defaultFolderId = await getDefaultFolderId(session);
+    if (!defaultFolderId) {
+      return NextResponse.json({ error: 'Defaultフォルダが見つかりません' }, { status: 500 });
+    }
+
+    // 2. 削除対象のフォルダに属するブックマークを全て取得する
     const bookmarksToUpdate = await client.getList({
       endpoint: 'bookmarks',
       queries: {
-        filters: `folder[equals]${folderId}`,
-        limit: 100, // Corrected from 1000 to 100
+        filters: `folder[equals]${folderIdToDelete}`,
+        limit: 100,
         fields: 'id',
       },
     });
 
-    // 2. Move each bookmark to "unclassified."
+    // 3. 取得した各ブックマークのfolderをDefaultフォルダのIDにする
     await Promise.all(
       bookmarksToUpdate.contents.map((bookmark) =>
         client.update({
           endpoint: 'bookmarks',
           contentId: bookmark.id,
           content: {
-            folder: null,
+            folder: defaultFolderId,
           },
         })
       )
     );
 
-    // 3. Delete the now-empty folder.
-    await deleteFolder(folderId);
-
+    // 4. ブックマークの移動が完了したら、フォルダ自体を削除する
+    await deleteFolder(folderIdToDelete);
+    
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Delete Folder API Error:', error);

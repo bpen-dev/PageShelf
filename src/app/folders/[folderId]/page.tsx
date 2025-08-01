@@ -28,15 +28,20 @@ export default async function FolderPage({ params: paramsPromise }: Props) {
   const currentFolder = allFolders.find(folder => folder.id === folderId);
   const title = 
     folderId === 'unclassified'
-      ? '未分類のブックマーク'
+      ? '未分類'
       : currentFolder
-      ? `${currentFolder.name} のブックマーク`
-      : 'フォルダ内のブックマーク';
+      ? currentFolder.name
+      : 'ブックマーク';
 
   return (
     <>
+      {/* --- 画面上部に固定されるヘッダーエリア --- */}
+      <div className="fixedHeader">
+        <h1 className={styles.headerTitle}>{title}</h1>
+      </div>
+
+      {/* --- スクロールするエリア --- */}
       <div className="scrollableArea">
-        <h1 className={styles.title}>{title}</h1>
         {bookmarks.length === 0 ? (
           <div className={emptyStateStyles.emptyState}>
             <FiInbox size={48} className={emptyStateStyles.icon} />
@@ -52,11 +57,9 @@ export default async function FolderPage({ params: paramsPromise }: Props) {
         )}
       </div>
 
+      {/* --- 画面下に固定されるエリア --- */}
       <div className="fixedFormArea">
-        <BookmarkForm
-          allFolders={allFolders}
-          currentFolderId={folderId !== 'unclassified' ? folderId : undefined}
-        />
+        <BookmarkForm allFolders={allFolders} currentFolderId={folderId} />
       </div>
     </>
   );
