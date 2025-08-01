@@ -2,27 +2,36 @@
 .card {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  /* gapはmainLinkに移すので削除 */
   background-color: var(--foreground);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 1rem 1.5rem;
+  padding: 0 1rem; /* 上下のpaddingを0に */
   transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
   border-left-style: solid;
   border-left-width: 5px;
-  border-left-color: transparent;
-  position: relative; /* 👇 [修正点3] z-indexを有効にするため */
-  z-index: 1; /* デフォルトの重なり順 */
+  position: relative;
+  z-index: 1;
 }
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  z-index: 2; /* ホバーしたカードを少し前面に */
+  z-index: 2;
 }
-
-/* 👇 [修正点4] メニューが開いているカードを最前面にする */
 .activeCard {
   z-index: 3;
+}
+
+/* 👇 [追加] メインのリンクエリアのスタイル */
+.mainLink {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 0; /* aタグに上下のpaddingを持たせる */
+  text-decoration: none;
+  color: inherit;
 }
 
 /* Card Content Sections */
@@ -42,7 +51,10 @@
 .url { font-size: 0.8rem; color: var(--text-secondary); }
 .description { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem; }
 
-.metaContent { flex-shrink: 0; }
+.metaContent {
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
 .folder {
   display: inline-flex;
   align-items: center;
@@ -53,10 +65,22 @@
   padding: 0.2rem 0.6rem;
   border-radius: 6px;
   transition: background-color 0.2s;
+  max-width: 150px;
+}
+.folder span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .folder:hover { background-color: #e2e8f0; }
 
-.actions { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+.actions {
+  display: flex;
+  align-items: center;
+  /* gap: 0.1rem; */
+  flex-shrink: 0;
+  margin-left: 1.5rem;
+}
 .actionButton {
   display: flex;
   align-items: center;
@@ -83,6 +107,8 @@
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   z-index: 10;
+  padding: 0.5rem;
+  min-width: 180px;
 }
 .dropdown ul { list-style: none; }
 .dropdownItem {
@@ -101,18 +127,17 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
+}
+.noColor {
+  background-color: var(--foreground);
   border: 1.5px solid var(--text-secondary);
 }
-
-
-/* Card border colors */
+.card.default { border-left-color: transparent; }
 .card.red { border-left-color: #f56565; }
 .card.blue { border-left-color: #4299e1; }
 .card.green { border-left-color: #48bb78; }
 .card.yellow { border-left-color: #f6e05e; }
 .card.gray { border-left-color: #a0aec0; }
-
-/* Icon and swatch colors */
 .colorIndicator.red, .colorSwatch.red { background-color: #f56565; border: none; }
 .colorIndicator.blue, .colorSwatch.blue { background-color: #4299e1; border: none; }
 .colorIndicator.green, .colorSwatch.green { background-color: #48bb78; border: none; }
