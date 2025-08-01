@@ -1,14 +1,14 @@
 :root {
   /* Color Palette */
-  --background: #f8f9fa; /* 全体の背景色 */
-  --foreground: #ffffff; /* カードなどの背景色 */
-  --text-primary: #1a202c; /* 基本の文字色 */
-  --text-secondary: #718096; /* やや薄い文字色 */
-  --border-color: #e2e8f0; /* 境界線 */
+  --background: #f8f9fa;
+  --foreground: #ffffff;
+  --text-primary: #1a202c;
+  --text-secondary: #718096;
+  --border-color: #e2e8f0;
   
-  --primary-color: #3182ce; /* アクセントカラー (ブルー) */
-  --primary-color-hover: #2b6cb0; /* アクセントカラー (ホバー時) */
-  --danger-color: #e53e3e; /* 削除ボタンなど */
+  --primary-color: #3182ce;
+  --primary-color-hover: #2b6cb0;
+  --danger-color: #e53e3e;
   --danger-color-hover: #c53030;
 }
 
@@ -35,7 +35,7 @@ a {
   text-decoration: none;
 }
 
-/* 2カラムレイアウト用のスタイル */
+/* --- ここからがレイアウトの重要な部分 --- */
 .container {
   display: flex;
 }
@@ -43,11 +43,13 @@ a {
 .sidebar {
   width: 280px;
   height: 100vh;
-  position: sticky;
+  position: sticky; /* サイドバーを固定 */
   top: 0;
+  flex-shrink: 0; /* サイドバーが縮まないようにする */
 }
 
 .mainContent {
   flex: 1;
   padding: 2rem;
+  min-width: 0; /* ★★★★★ これがレイアウト崩れを防ぐ、最も重要な一行です！ ★★★★★ */
 }

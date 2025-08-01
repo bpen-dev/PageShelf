@@ -49,7 +49,7 @@ export default async function FolderPage({ params: paramsPromise }: Props) {
           <p className={emptyStateStyles.text}>下のフォームから最初のブックマークを追加してみましょう！</p>
         </div>
       ) : (
-        <div className={styles.grid}>
+        <div className={styles.listContainer}>
           {bookmarks.map((bookmark: Bookmark) => (
             <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
           ))}

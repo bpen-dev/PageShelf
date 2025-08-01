@@ -22,7 +22,7 @@ export default async function Home() {
   return (
     <>
       <h1 className={styles.title}>すべてのブックマーク</h1>
-      <div className={styles.grid}>
+      <div className={styles.listContainer}>
         {bookmarks.map((bookmark: Bookmark) => (
           <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
         ))}

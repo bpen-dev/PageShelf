@@ -1,19 +1,27 @@
 import { createClient, type MicroCMSContentId, type MicroCMSDate } from 'microcms-js-sdk';
 import { Session } from 'next-auth';
 
-// [修正点1] Folderの型定義を、microCMSのシステムフィールドを含む完全なものにします
-export type Folder = {
+// ユーザーが自分で定義したフィールドの型
+type FolderContent = {
   name: string;
   userId: string;
-} & MicroCMSContentId & MicroCMSDate;
+};
 
-export type Bookmark = {
+// microCMSのシステムフィールドを含んだ、最終的なフォルダの型
+export type Folder = FolderContent & MicroCMSContentId & MicroCMSDate;
+
+// ユーザーが自分で定義したフィールドの型
+export type BookmarkContent = {
   url: string;
   title: string;
-  description: string;
+  description?: string;
   folder?: Folder;
+  color?: 'red' | 'blue' | 'green' | 'yellow' | 'gray';
   userId: string;
-} & MicroCMSContentId & MicroCMSDate;
+};
+
+// microCMSのシステムフィールドを含んだ、最終的なブックマークの型
+export type Bookmark = BookmarkContent & MicroCMSContentId & MicroCMSDate;
 
 
 if (!process.env.MICROCMS_SERVICE_DOMAIN) {
@@ -30,7 +38,7 @@ export const client = createClient({
 
 // --- フォルダ操作用の関数 ---
 export const createFolder = async (name: string, userId: string) => {
-  const newFolder = await client.create({ // client.create<Folder> は不要
+  const newFolder = await client.create<FolderContent>({
     endpoint: 'folders',
     content: { name, userId },
   });
@@ -38,7 +46,7 @@ export const createFolder = async (name: string, userId: string) => {
 };
 
 export const updateFolderName = async (id: string, name: string) => {
-  const updatedFolder = await client.update({ // client.update<Folder> は不要
+  const updatedFolder = await client.update<Partial<FolderContent>>({
     endpoint: 'folders',
     contentId: id,
     content: { name },
@@ -46,7 +54,6 @@ export const updateFolderName = async (id: string, name: string) => {
   return updatedFolder;
 };
 
-// 👇 [修正点2] エラーの原因となっていた、この関数が不足していました
 export const deleteFolder = async (id: string) => {
   await client.delete({
     endpoint: 'folders',

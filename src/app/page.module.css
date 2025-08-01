@@ -1,15 +1,16 @@
-.main {
-  padding: 2rem;
-}
-
 .title {
   font-size: 2rem;
   margin-bottom: 2rem;
-  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formContainer {
+  margin-top: 2.5rem;
 }

@@ -41,18 +41,6 @@
   resize: vertical;
 }
 
-.tagGroup {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.tagItem {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
 .button {
   background-color: #3182ce;
   color: white;
@@ -82,3 +70,37 @@
 .deleteButton:hover {
   background-color: #c53030;
 }
+
+/* 👇 色選択用のスタイルを追加 */
+.colorGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.colorItem {
+  display: flex;
+}
+
+.colorItem input[type="radio"] {
+  display: none; /* ラジオボタン本体は隠す */
+}
+
+.colorLabel {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #cbd5e0;
+  transition: box-shadow 0.2s;
+}
+
+.colorItem input[type="radio"]:checked + .colorLabel {
+  box-shadow: 0 0 0 2px #4299e1;
+}
+
+.red { background-color: #f56565; }
+.blue { background-color: #4299e1; }
+.green { background-color: #48bb78; }
+.yellow { background-color: #f6e05e; }
+.gray { background-color: #a0aec0; }

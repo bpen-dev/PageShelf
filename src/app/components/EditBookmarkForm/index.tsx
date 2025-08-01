@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { type Bookmark, type Folder } from '@/libs/microcms';
 import styles from './index.module.css';
 
-
 type Props = {
   bookmark: Bookmark;
   allFolders: Folder[];
@@ -16,35 +15,18 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description || '');
   const [selectedFolder, setSelectedFolder] = useState(bookmark.folder?.id || '');
+  const [color, setColor] = useState(bookmark.color || ''); // 👈 色用のstateを追加
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingOgp, setIsFetchingOgp] = useState(false); // 👈 追加
   const router = useRouter();
 
-  // 👇 OGP取得関数を追加
-  const handleUrlBlur = async () => {
-    if (!url) return;
-    try {
-      setIsFetchingOgp(true);
-      const response = await fetch(`/api/ogp?url=${encodeURIComponent(url)}`);
-      if (!response.ok) return;
-      const data = await response.json();
-      if (data.title) {
-        setTitle(data.title);
-      }
-    } catch (error) {
-      console.error('Failed to fetch OGP:', error);
-    } finally {
-      setIsFetchingOgp(false);
-    }
-  };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description, folder: selectedFolder || null }),
+      // 👇 bodyにcolorを追加
+      body: JSON.stringify({ url, title, description, folder: selectedFolder || null, color }),
     });
     setIsLoading(false);
     router.push('/');
@@ -68,10 +50,10 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.formGroup}>
         <label htmlFor="url" className={styles.label}>URL</label>
-        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} onBlur={handleUrlBlur} required className={styles.input} />
+        <input type="url" id="url" value={url} onChange={(e) => setUrl(e.target.value)} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>タイトル {isFetchingOgp && '(自動取得中...)'}</label>
+        <label htmlFor="title" className={styles.label}>タイトル</label>
         <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required className={styles.input} />
       </div>
       <div className={styles.formGroup}>
@@ -94,6 +76,26 @@ export default function EditBookmarkForm({ bookmark, allFolders }: Props) {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* 👇 色選択用のラジオボタンを追加 */}
+      <div className={styles.formGroup}>
+        <label className={styles.label}>カラー</label>
+        <div className={styles.colorGroup}>
+          {['red', 'blue', 'green', 'yellow', 'gray'].map((c) => (
+            <div key={c} className={styles.colorItem}>
+              <input
+                type="radio"
+                id={`color-${c}`}
+                name="color"
+                value={c}
+                checked={color === c}
+                onChange={(e) => setColor(e.target.value)}
+              />
+              <label htmlFor={`color-${c}`} className={`${styles.colorLabel} ${styles[c]}`}></label>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>

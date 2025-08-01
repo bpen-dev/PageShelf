@@ -6,7 +6,7 @@ import { getFolders } from "@/libs/microcms";
 import AuthProvider from "./components/AuthProvider";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";
-import { Toaster } from "react-hot-toast"; // 👈 Toasterをインポート
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +27,6 @@ export default async function RootLayout({
     <html lang="ja">
       <body className={inter.className}>
         <AuthProvider>
-          {/* 👇 Toasterを<body>の直下に配置 */}
           <Toaster position="top-center" reverseOrder={false} />
           <div className="container">
             <aside className="sidebar">

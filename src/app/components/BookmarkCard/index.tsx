@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image'; // 👈 Imageをインポート
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import styles from './index.module.css';
 import { type Bookmark, type Folder } from '@/libs/microcms';
 import { FiExternalLink, FiEdit2, FiMove, FiFolder as FolderIcon } from 'react-icons/fi';
-import toast from 'react-hot-toast'; // 👈 toastをインポート
+import toast from 'react-hot-toast';
+import { useClickOutside } from '@/hooks/useClickOutside';
 
 type Props = {
   bookmark: Bookmark;
@@ -16,7 +17,11 @@ type Props = {
 
 export default function BookmarkCard({ bookmark, allFolders }: Props) {
   const router = useRouter();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [folderMenuOpen, setFolderMenuOpen] = useState(false);
+  const [colorMenuOpen, setColorMenuOpen] = useState(false);
+
+  const folderMenuRef = useClickOutside<HTMLDivElement>(() => setFolderMenuOpen(false));
+  const colorMenuRef = useClickOutside<HTMLDivElement>(() => setColorMenuOpen(false));
 
   const handleFolderChange = async (newFolder: Folder | null) => {
     await fetch(`/api/bookmarks/${bookmark.id}`, {
@@ -24,50 +29,88 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ folder: newFolder ? newFolder.id : null }),
     });
-    setIsMenuOpen(false);
-    toast.success(`「${newFolder ? newFolder.name : '未分類'}」に移動しました`); // 👈 通知を追加
+    setFolderMenuOpen(false);
+    toast.success(`「${newFolder ? newFolder.name : '未分類'}」に移動しました`);
     router.refresh();
   };
 
+  const handleColorChange = async (newColor: string | null) => {
+    await fetch(`/api/bookmarks/${bookmark.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ color: newColor }),
+    });
+    setColorMenuOpen(false);
+    toast.success('カラーを変更しました');
+    router.refresh();
+  };
+
+  const colors = ['red', 'blue', 'green', 'yellow', 'gray'];
+
+  // 👇 [修正点1] どちらかのメニューが開いていれば true になる変数を定義
+  const isAnyMenuOpen = folderMenuOpen || colorMenuOpen;
+
   return (
-    <article className={styles.card}>
-      <div>
-        <div className={styles.titleContainer}>
-          {/* 👇 ファビコン表示を追加 */}
-          <Image 
-            src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(bookmark.url)}`}
-            width={16}
-            height={16}
-            alt=""
-            className={styles.favicon}
-          />
-          <h2 className={styles.title}>{bookmark.title}</h2>
-        </div>
-        <p className={styles.url}>{bookmark.url}</p>
-        <p className={styles.description}>{bookmark.description || ''}</p>
-        
-        <div className={styles.folderWrapper}>
-          {bookmark.folder && (
-            <Link href={`/folders/${bookmark.folder.id}`} className={styles.folder}>
-              <FolderIcon size={14} /> {bookmark.folder.name}
-            </Link>
-          )}
-        </div>
+    // 👇 [修正点2] メニューが開いていれば .activeCard クラスを追加
+    <article className={`${styles.card} ${styles[bookmark.color || 'default']} ${isAnyMenuOpen ? styles.activeCard : ''}`}>
+      <div className={styles.faviconContainer}>
+        <Image 
+          src={`https://www.google.com/s2/favicons?sz=64&domain_url=${encodeURIComponent(bookmark.url)}`}
+          width={24}
+          height={24}
+          alt=""
+          className={styles.favicon}
+        />
       </div>
-      
+
+      <div className={styles.mainContent}>
+        <h2 className={styles.title}>{bookmark.title}</h2>
+        <p className={styles.url}>{bookmark.url}</p>
+        {bookmark.description && <p className={styles.description}>{bookmark.description}</p>}
+      </div>
+
+      <div className={styles.metaContent}>
+        {bookmark.folder && (
+          <Link href={`/folders/${bookmark.folder.id}`} className={styles.folder}>
+            <FolderIcon size={14} /> {bookmark.folder.name}
+          </Link>
+        )}
+      </div>
+
       <div className={styles.actions}>
-        <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className={styles.button}>
-          <FiExternalLink size={14} />サイトへ
+        <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className={styles.actionButton} title="サイトへ">
+          <FiExternalLink />
         </a>
-        <Link href={`/bookmarks/${bookmark.id}/edit`} className={styles.button}>
-          <FiEdit2 size={14} />編集
+        <Link href={`/bookmarks/${bookmark.id}/edit`} className={styles.actionButton} title="編集">
+          <FiEdit2 />
         </Link>
         
-        <div className={styles.folderMenu}>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className={styles.button} title="フォルダを移動">
-            <FiMove size={14} />移動
+        <div className={styles.menuWrapper} ref={colorMenuRef}>
+          <button onClick={() => setColorMenuOpen(!colorMenuOpen)} className={styles.actionButton} title="カラーを変更">
+            <div className={`${styles.colorIndicator} ${styles[bookmark.color || 'noColor']}`}></div>
           </button>
-          {isMenuOpen && (
+          {colorMenuOpen && (
+            <div className={styles.dropdown}>
+              <ul>
+                {colors.map(c => (
+                  <li key={c} onClick={() => handleColorChange(c)} className={styles.dropdownItem}>
+                    <div className={`${styles.colorSwatch} ${styles[c]}`}></div> {c}
+                  </li>
+                ))}
+                <li onClick={() => handleColorChange(null)} className={styles.dropdownItem}>
+                  <div className={`${styles.colorSwatch} ${styles.noColor}`}></div>
+                  色なし
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.menuWrapper} ref={folderMenuRef}>
+          <button onClick={() => setFolderMenuOpen(!folderMenuOpen)} className={styles.actionButton} title="フォルダを移動">
+            <FiMove />
+          </button>
+          {folderMenuOpen && (
             <div className={styles.dropdown}>
               <ul>
                 <li onClick={() => handleFolderChange(null)} className={styles.dropdownItem}>
