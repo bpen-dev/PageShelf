@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "./components/Sidebar"; // 👈 Sidebarをインポート
-import { getFolders } from "@/libs/microcms"; // 👈 getFoldersをインポート
+import Sidebar from "./components/Sidebar";
+import { getFolders } from "@/libs/microcms";
+import AuthProvider from "./components/AuthProvider"; // 👈 AuthProviderをインポート
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,17 +17,19 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const allFolders = await getFolders(); // 👈 全てのフォルダを取得
+  const allFolders = await getFolders();
 
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <div style={{ display: 'flex' }}>
-          <Sidebar allFolders={allFolders} /> {/* 👈 Sidebarを配置 */}
-          <main style={{ flex: 1, padding: '2rem' }}>
-            {children} {/* 👈 ここに各ページの内容が表示される */}
-          </main>
-        </div>
+        <AuthProvider> {/* 👈 AuthProviderで全体を囲む */}
+          <div style={{ display: 'flex' }}>
+            <Sidebar allFolders={allFolders} />
+            <main style={{ flex: 1, padding: '2rem' }}>
+              {children}
+            </main>
+          </div>
+        </AuthProvider> {/* 👈 AuthProviderで全体を囲む */}
       </body>
     </html>
   );

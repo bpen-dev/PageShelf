@@ -77,3 +77,9 @@
   padding: 0 0.75rem;
   cursor: pointer;
 }
+
+.authContainer {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
