@@ -1,85 +1,94 @@
 .sidebar {
-  background-color: #f7fafc;
-  border-right: 1px solid #e2e8f0;
+  background-color: var(--foreground);
+  border-right: 1px solid var(--border-color);
   padding: 1.5rem;
-  height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
-
+.authContainer {
+  margin-bottom: 1.5rem;
+}
 .list {
   list-style: none;
-  padding: 0;
-  margin: 0;
 }
-
 .link {
-  display: block;
-  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   text-decoration: none;
-  color: #4a5568;
-  border-radius: 6px;
-  transition: background-color 0.2s;
+  color: var(--text-secondary);
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+  font-weight: 500;
 }
-
 .link:hover {
-  background-color: #e2e8f0;
+  background-color: #f1f5f9;
+  color: var(--text-primary);
 }
-
 .divider {
   border: none;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
   margin: 1rem 0;
 }
-
 .folderItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-radius: 8px;
 }
-
+.folderItem:hover .folderActions {
+  opacity: 1;
+}
 .folderItem .link {
   flex: 1;
 }
-
 .folderActions {
   display: flex;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
-
 .actionButton {
   background: none;
   border: none;
   cursor: pointer;
   padding: 0.5rem;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  color: var(--text-secondary);
+  border-radius: 6px;
 }
-
 .actionButton:hover {
-  opacity: 1;
+  background-color: #e2e8f0;
+  color: var(--text-primary);
 }
-
 .addFolderForm {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
   display: flex;
-  margin-top: 1.5rem;
 }
-
 .addFolderInput {
   flex: 1;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 6px 0 0 6px;
   padding: 0.5rem;
+  min-width: 0;
 }
-
+.addFolderInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.3);
+}
 .addFolderButton {
-  border: 1px solid #e2e8f0;
-  border-left: none;
-  background-color: #f7fafc;
+  border: 1px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
   border-radius: 0 6px 6px 0;
   padding: 0 0.75rem;
   cursor: pointer;
+  font-size: 1.2rem;
+  transition: background-color 0.2s;
 }
-
-.authContainer {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+.addFolderButton:hover {
+  background-color: var(--primary-color-hover);
 }

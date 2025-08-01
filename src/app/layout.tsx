@@ -6,6 +6,7 @@ import { getFolders } from "@/libs/microcms";
 import AuthProvider from "./components/AuthProvider";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";
+import { Toaster } from "react-hot-toast"; // 👈 Toasterをインポート
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,16 +20,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions); // 👈 セッションを取得
-  const allFolders = await getFolders(session); // 👈 取得したセッションを渡す
+  const session = await getServerSession(authOptions);
+  const allFolders = await getFolders(session);
 
   return (
     <html lang="ja">
       <body className={inter.className}>
         <AuthProvider>
-          <div style={{ display: 'flex' }}>
-            <Sidebar allFolders={allFolders} />
-            <main style={{ flex: 1, padding: '2rem' }}>
+          {/* 👇 Toasterを<body>の直下に配置 */}
+          <Toaster position="top-center" reverseOrder={false} />
+          <div className="container">
+            <aside className="sidebar">
+              <Sidebar allFolders={allFolders} />
+            </aside>
+            <main className="mainContent">
               {children}
             </main>
           </div>

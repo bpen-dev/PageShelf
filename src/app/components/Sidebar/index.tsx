@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { type Folder } from '@/libs/microcms';
 import styles from './index.module.css';
-import AuthButton from '../AuthButton'; // 👈 AuthButtonをインポート
+import AuthButton from '../AuthButton';
+import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import toast from 'react-hot-toast'; // 👈 toastをインポート
 
 type Props = {
   allFolders: Folder[];
@@ -31,11 +33,12 @@ export default function Sidebar({ allFolders }: Props) {
     const newFolder = await res.json();
     setFolders([...folders, newFolder]);
     setNewFolderName('');
+    toast.success(`「${newFolder.name}」を作成しました`); // 👈 通知を追加
     router.refresh();
   };
 
-  const handleEditFolder = async (id: string) => {
-    const newName = window.prompt('新しいフォルダ名を入力してください');
+  const handleEditFolder = async (id: string, currentName: string) => {
+    const newName = window.prompt('新しいフォルダ名を入力してください', currentName);
     if (!newName || !newName.trim()) return;
     const res = await fetch(`/api/folders/${id}`, {
       method: 'PATCH',
@@ -44,6 +47,7 @@ export default function Sidebar({ allFolders }: Props) {
     });
     const updatedFolder = await res.json();
     setFolders(folders.map(f => (f.id === id ? updatedFolder : f)));
+    toast.success(`「${newName}」に名前を変更しました`); // 👈 通知を追加
     router.refresh();
   };
   
@@ -53,31 +57,28 @@ export default function Sidebar({ allFolders }: Props) {
       method: 'DELETE',
     });
     setFolders(folders.filter(f => f.id !== id));
+    toast.success(`「${name}」を削除しました`); // 👈 通知を追加
     router.refresh();
   };
 
   return (
     <aside className={styles.sidebar}>
-      {/* 👇 認証ボタンを一番上に追加 */}
-      <div className={styles.authContainer}>
-        <AuthButton />
-      </div>
-
+      <div className={styles.authContainer}><AuthButton /></div>
       <nav>
         <ul className={styles.list}>
-          <li><Link href="/" className={styles.link}>すべてのブックマーク</Link></li>
-          <li><Link href="/folders/unclassified" className={styles.link}>未分類</Link></li>
+          <li><Link href="/" className={styles.link}><FiHome />すべてのブックマーク</Link></li>
+          <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li>
         </ul>
         <hr className={styles.divider} />
         <ul className={styles.list}>
           {folders.map((folder) => (
             <li key={folder.id} className={styles.folderItem}>
               <Link href={`/folders/${folder.id}`} className={styles.link}>
-                {folder.name}
+                <FiFolder />{folder.name}
               </Link>
               <div className={styles.folderActions}>
-                <button onClick={() => handleEditFolder(folder.id)} className={styles.actionButton}>✏️</button>
-                <button onClick={() => handleDeleteFolder(folder.id, folder.name)} className={styles.actionButton}>🗑️</button>
+                <button onClick={() => handleEditFolder(folder.id, folder.name)} className={styles.actionButton} title="名前を変更"><FiEdit2 /></button>
+                <button onClick={() => handleDeleteFolder(folder.id, folder.name)} className={styles.actionButton} title="削除"><FiTrash2 /></button>
               </div>
             </li>
           ))}
@@ -91,7 +92,7 @@ export default function Sidebar({ allFolders }: Props) {
           placeholder="新しいフォルダを追加"
           className={styles.addFolderInput}
         />
-        <button type="submit" className={styles.addFolderButton}>+</button>
+        <button type="submit" className={styles.addFolderButton} title="追加"><FiPlus /></button>
       </form>
     </aside>
   );

@@ -1,99 +1,117 @@
 .card {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1rem;
-  transition: box-shadow 0.2s;
-  display: flex; /* 追加 */
-  flex-direction: column; /* 追加 */
-  justify-content: space-between; /* 追加 */
+  background-color: var(--foreground);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 .title {
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.1rem;
+  font-weight: 600;
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 .url {
-  font-size: 0.9rem;
-  color: #4a5568;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 .description {
-  font-size: 1rem;
-  color: #718096;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
   margin-bottom: 1rem;
+  line-height: 1.6;
 }
-.folderWrapper { /* tagsからfolderWrapperに変更 */
-  margin-top: auto; /* 追加 */
-  padding-top: 1rem; /* 追加 */
+.folderWrapper {
+  margin-top: auto;
+  padding-top: 1rem;
 }
-.folder { /* tagからfolderに変更 */
+.folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.8rem;
-  background-color: #e2e8f0;
+  background-color: #edf2f7;
   color: #4a5568;
   padding: 0.2rem 0.6rem;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+.folder:hover {
+  background-color: #e2e8f0;
 }
 .actions {
   margin-top: 1rem;
   display: flex;
   gap: 0.5rem;
+  align-items: center;
 }
 .button {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   padding: 0.3rem 0.8rem;
-  font-size: 0.9rem;
-  border: 1px solid #e2e8f0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  background-color: var(--foreground);
+  color: var(--text-secondary);
 }
 .button:hover {
   background-color: #f1f5f9;
+  color: var(--text-primary);
 }
-.select {
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 0 0.5rem;
-  font-size: 0.9rem;
-  background-color: white;
-}
-
 .folderMenu {
-  position: relative; /* ドロップダウンを配置する基準点になります */
+  position: relative;
+  margin-left: auto;
 }
-
 .dropdown {
   position: absolute;
-  bottom: 100%; /* ボタンの真上に表示 */
+  bottom: 120%;
   right: 0;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--foreground);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   z-index: 10;
-  width: max-content; /* 中身の幅に合わせる */
+  width: max-content;
   max-height: 200px;
   overflow-y: auto;
+  padding: 0.5rem;
 }
-
 .dropdown ul {
   list-style: none;
-  padding: 0.5rem;
-  margin: 0;
 }
-
 .dropdownItem {
   padding: 0.5rem 1rem;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
-
 .dropdownItem:hover {
   background-color: #f1f5f9;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.favicon {
+  flex-shrink: 0; /* アイコンが縮まないように */
 }
