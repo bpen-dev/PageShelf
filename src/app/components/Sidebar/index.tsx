@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { type Folder } from '@/utils/supabase/queries';
 import styles from './index.module.css';
 import AuthButton from '../AuthButton';
-import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus, FiShield, FiSend } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -91,7 +91,7 @@ export default function Sidebar({ allFolders }: Props) {
       <nav className={styles.nav}>
         <ul className={styles.list}>
           <li><Link href="/" className={styles.link}><FiHome />すべてのブックマーク</Link></li>
-          {/* <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li> */}
+          <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li>
         </ul>
         <hr className={styles.divider} />
         <form onSubmit={handleCreateFolder} className={styles.addFolderForm}>
@@ -118,6 +118,16 @@ export default function Sidebar({ allFolders }: Props) {
           ))}
         </ul>
       </nav>
+
+      {/* 👇 [追加] サイドバーの一番下にリンクエリアを新設 */}
+      <div className={styles.footerLinks}>
+        <Link href="/privacy-policy" className={styles.footerLink}>
+          <FiShield size={14} /> プライバシーポリシー
+        </Link>
+        {/* <Link href="/contact" className={styles.footerLink}>
+          <FiSend size={14} /> お問い合わせ
+        </Link> */}
+      </div>
     </aside>
   );
 }
