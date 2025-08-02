@@ -112,3 +112,10 @@
   background-color: #e2e8f0;
   color: var(--text-primary);
 }
+
+.footerLinks {
+  margin-top: auto; /* フッターリンクを一番下に寄せる */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
