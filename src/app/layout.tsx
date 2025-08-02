@@ -10,6 +10,8 @@ import type { Folder } from "@/utils/supabase/queries";
 import MobileHeader from "./components/MobileHeader";
 import { FiLoader } from "react-icons/fi";
 import { useRouter } from "next/navigation"; // 👈 useRouterをインポート
+import GoogleAnalytics from "./components/GoogleAnalytics"; // 👈 GAをインポート
+import { Suspense } from "react"; // 👈 Suspenseをインポート
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -76,6 +78,9 @@ export default function RootLayout({
     return (
       <html lang="ja">
         <body className={inter.className}>
+          <Suspense>
+          <GoogleAnalytics />
+          </Suspense>
           <Toaster position="top-center" reverseOrder={false} />
           <div className="container">
             <aside className="sidebar">
