@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 type Props = {
   bookmark: Bookmark;
   allFolders: Folder[];
-  onClose: () => void; // モーダルを閉じる関数を受け取る
+  onClose: () => void;
 };
 
 export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Props) {
@@ -17,7 +17,7 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description || '');
   const [selectedFolder, setSelectedFolder] = useState(bookmark.folder_id?.toString() || '');
-  const [color, setColor] = useState(bookmark.color || '');
+  const [color, setColor] = useState(bookmark.color || ''); // 👈 [修正点] 配列([])ではなく、文字列('')を初期値に
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -32,12 +32,12 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
         title, 
         description, 
         folder_id: selectedFolder || null, 
-        color: color || null 
+        color: color || null // 👈 [修正点] 文字列をそのまま送る
       }),
     });
     setIsLoading(false);
     toast.success('更新しました');
-    onClose(); // ページ遷移の代わりにモーダルを閉じる
+    onClose();
     router.refresh();
   };
   
@@ -51,7 +51,7 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
     });
     setIsLoading(false);
     toast.success('削除しました');
-    onClose(); // ページ遷移の代わりにモーダルを閉じる
+    onClose();
     router.refresh();
   };
 
@@ -69,7 +69,6 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
         <label htmlFor="description" className={styles.label}>メモ</label>
         <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
       </div>
-
       <div className={styles.formGroup}>
         <label htmlFor="folder" className={styles.label}>フォルダ</label>
         <select
@@ -86,7 +85,6 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
           ))}
         </select>
       </div>
-
       <div className={styles.formGroup}>
         <label className={styles.label}>カラー</label>
         <div className={styles.colorGroup}>
@@ -116,7 +114,6 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
           ))}
         </div>
       </div>
-
       <div className={styles.actions}>
         <button type="button" onClick={onClose} className={styles.cancelButton}>
           キャンセル

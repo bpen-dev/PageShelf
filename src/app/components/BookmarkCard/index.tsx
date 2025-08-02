@@ -40,13 +40,13 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
     await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ color: newColor }),
+      body: JSON.stringify({ color: newColor }), // 👈 文字列をそのまま送る
     });
     setColorMenuOpen(false);
     toast.success('カラーを変更しました');
     router.refresh();
   };
-  
+
   const handleCopyUrl = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(bookmark.url);

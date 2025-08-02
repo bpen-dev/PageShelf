@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server'; // 👈 [重要] server.tsからインポート
+import { createClient } from '@/utils/supabase/server';
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest, 
+  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 [修正点1]
+) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -10,13 +13,13 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 
   try {
+    const params = await paramsPromise; // 👈 [修正点2] awaitでparamsを取得
     const contentToUpdate = await request.json();
 
-    // RLSポリシーが所有者チェックを自動で行うため、API側でのチェックは不要
     const { error } = await supabase
       .from('bookmarks')
       .update(contentToUpdate)
-      .eq('id', params.id); // 指定したIDの行を更新
+      .eq('id', params.id); // 👈 ここで使うparamsが正しくなる
 
     if (error) throw error;
 
@@ -27,7 +30,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest, 
+  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 [修正点1]
+) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -36,10 +42,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   }
 
   try {
+    const params = await paramsPromise; // 👈 [修正点2] awaitでparamsを取得
     const { error } = await supabase
       .from('bookmarks')
       .delete()
-      .eq('id', params.id); // 指定したIDの行を削除
+      .eq('id', params.id); // 👈 ここで使うparamsが正しくなる
 
     if (error) throw error;
 
