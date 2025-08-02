@@ -1,6 +1,6 @@
 'use client';
 
-import { type Bookmark, type Folder } from '@/libs/microcms';
+import { type Bookmark, type Folder } from '@/utils/microcms';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import EditBookmarkForm from '../EditBookmarkForm';
 import styles from './index.module.css';

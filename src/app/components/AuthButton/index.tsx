@@ -1,42 +1,75 @@
 'use client';
 
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase';
+import type { User } from '@supabase/supabase-js';
 import Image from 'next/image';
 import styles from './index.module.css';
+import { useRouter } from 'next/navigation';
 
 export default function AuthButton() {
-  const { data: session, status } = useSession();
+  const supabase = createClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  // セッション情報を取得中
-  if (status === 'loading') {
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      router.refresh(); // ログイン状態が変わったらページをリフレッシュ
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth, router]);
+
+  const handleSignIn = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: location.origin, // ログイン後にこのページに戻ってくる
+      },
+    });
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
+  
+  if (loading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
-  // ログインしている場合
-  if (session) {
+  if (user) {
     return (
       <div className={styles.container}>
-        {session.user?.image && (
+        {user.user_metadata.avatar_url && (
           <Image
-            src={session.user.image}
-            alt={session.user.name || 'User Avatar'}
+            src={user.user_metadata.avatar_url}
+            alt={user.user_metadata.full_name || 'User Avatar'}
             width={32}
             height={32}
             className={styles.avatar}
           />
         )}
-        <span className={styles.userName}>{session.user?.name}</span>
-        <button onClick={() => signOut()} className={styles.button}>
+        <span className={styles.userName}>{user.user_metadata.full_name}</span>
+        <button onClick={handleSignOut} className={styles.button}>
           ログアウト
         </button>
       </div>
     );
   }
 
-  // ログインしていない場合
   return (
     <div className={styles.container}>
-      <button onClick={() => signIn('google')} className={styles.button}>
+      <button onClick={handleSignIn} className={styles.button}>
         Googleでログイン
       </button>
     </div>

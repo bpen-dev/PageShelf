@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createFolder } from '@/libs/microcms';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { createClient } from '@/utils/supabase/server'; // 👈 [重要] server.tsからインポートする
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user?.email) {
+  const supabase = createClient(); // サーバー用のクライアントを作成
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
     return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
   }
 
@@ -14,8 +14,15 @@ export async function POST(request: NextRequest) {
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
-    // 👇 createFolderにユーザーIDを渡す
-    const data = await createFolder(name, session.user.email);
+
+    const { data, error } = await supabase
+      .from('folders')
+      .insert({ name, user_id: user.id })
+      .select()
+      .single();
+
+    if (error) throw error;
+    
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create folder' }, { status: 500 });

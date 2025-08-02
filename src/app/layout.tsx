@@ -2,11 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
-import { getFolders } from "@/libs/microcms";
-import AuthProvider from "./components/AuthProvider";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "./api/auth/[...nextauth]/route";
 import { Toaster } from "react-hot-toast";
+import { getFolders } from "@/utils/supabase/queries"; // 👈 新しい関数をインポート
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,24 +17,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
-  const allFolders = await getFolders(session);
+  const allFolders = await getFolders();
 
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <AuthProvider>
-          <Toaster position="top-center" reverseOrder={false} />
-          <div className="container">
-            <aside className="sidebar">
-              <Sidebar allFolders={allFolders} />
-            </aside>
-            {/* 👇 [修正点] mainContentの使い方が変わります */}
-            <div className="mainContent">
-              {children} {/* ここに各ページコンポーネントが展開される */}
-            </div>
-          </div>
-        </AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} />
+        <div className="container">
+          <aside className="sidebar">
+            <Sidebar allFolders={allFolders} />
+          </aside>
+          <main className="mainContent">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );

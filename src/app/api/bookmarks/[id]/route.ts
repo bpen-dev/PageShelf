@@ -1,82 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/libs/microcms';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { createClient } from '@/utils/supabase/server'; // 👈 [重要] server.tsからインポート
 
-// ユーザーがそのブックマークの所有者かを確認するヘルパー関数
-async function checkOwnership(contentId: string, userEmail: string) {
-  try {
-    const bookmark = await client.get({ endpoint: 'bookmarks', contentId });
-    return bookmark.userId === userEmail;
-  } catch (error) {
-    return false;
-  }
-}
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-// データを更新する (PATCH)
-export async function PATCH(
-  request: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user?.email) {
+  if (!user) {
     return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
   }
 
-  const params = await paramsPromise;
-  const isOwner = await checkOwnership(params.id, session.user.email);
-  if (!isOwner) {
-    return NextResponse.json({ error: '権限がありません' }, { status: 403 });
-  }
-  
   try {
-    const changes = await request.json(); // ブラウザからの変更点 (例: { color: 'red' })
+    const contentToUpdate = await request.json();
 
-    const contentToUpdate = { ...changes };
+    // RLSポリシーが所有者チェックを自動で行うため、API側でのチェックは不要
+    const { error } = await supabase
+      .from('bookmarks')
+      .update(contentToUpdate)
+      .eq('id', params.id); // 指定したIDの行を更新
 
-    // 👇 [修正点] もしcolorの変更があれば、配列で囲む
-    if (contentToUpdate.color) {
-      contentToUpdate.color = [contentToUpdate.color];
-    }
+    if (error) throw error;
 
-    // もしcolorを「なし」にする場合は、空の配列を送る
-    if (changes.color === null) {
-      contentToUpdate.color = [];
-    }
-    
-    const data = await client.update({
-      endpoint: 'bookmarks',
-      contentId: params.id,
-      content: contentToUpdate, // 変更点だけを送る
-    });
-    
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json({ message: '更新しました' }, { status: 200 });
   } catch (error) {
     console.error('API Update Error:', error);
-    return NextResponse.json({ error: 'Failed to update bookmark' }, { status: 500 });
+    return NextResponse.json({ error: 'ブックマークの更新に失敗しました。' }, { status: 500 });
   }
 }
 
-// データを削除する (DELETE)
-export async function DELETE(
-  request: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ id: string }> }
-) {
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user?.email) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
     return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
   }
 
-  const params = await paramsPromise;
-  const isOwner = await checkOwnership(params.id, session.user.email);
-  if (!isOwner) {
-    return NextResponse.json({ error: '権限がありません' }, { status: 403 });
-  }
-  
   try {
-    await client.delete({ endpoint: 'bookmarks', contentId: params.id });
+    const { error } = await supabase
+      .from('bookmarks')
+      .delete()
+      .eq('id', params.id); // 指定したIDの行を削除
+
+    if (error) throw error;
+
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete bookmark' }, { status: 500 });
+    return NextResponse.json({ error: 'ブックマークの削除に失敗しました。' }, { status: 500 });
   }
 }

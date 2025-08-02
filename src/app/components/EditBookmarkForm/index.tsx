@@ -2,22 +2,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type Bookmark, type Folder } from '@/libs/microcms';
+import { type Bookmark, type Folder } from '@/utils/supabase/queries';
 import styles from './index.module.css';
 import toast from 'react-hot-toast';
 
 type Props = {
   bookmark: Bookmark;
   allFolders: Folder[];
-  onClose: () => void;
+  onClose: () => void; // モーダルを閉じる関数を受け取る
 };
 
 export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Props) {
   const [url, setUrl] = useState(bookmark.url);
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description || '');
-  const [selectedFolder, setSelectedFolder] = useState(bookmark.folder?.id || '');
-  const [color, setColor] = useState(bookmark.color?.[0] || '');
+  const [selectedFolder, setSelectedFolder] = useState(bookmark.folder_id?.toString() || '');
+  const [color, setColor] = useState(bookmark.color || '');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -27,11 +27,17 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
     await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, title, description, folder: selectedFolder || null, color: color || null }),
+      body: JSON.stringify({ 
+        url, 
+        title, 
+        description, 
+        folder_id: selectedFolder || null, 
+        color: color || null 
+      }),
     });
     setIsLoading(false);
     toast.success('更新しました');
-    onClose();
+    onClose(); // ページ遷移の代わりにモーダルを閉じる
     router.refresh();
   };
   
@@ -45,7 +51,7 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
     });
     setIsLoading(false);
     toast.success('削除しました');
-    onClose();
+    onClose(); // ページ遷移の代わりにモーダルを閉じる
     router.refresh();
   };
 
@@ -72,7 +78,7 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
           onChange={(e) => setSelectedFolder(e.target.value)}
           className={styles.input}
         >
-          <option value="">フォルダを選択...</option>
+          <option value="">未分類</option>
           {allFolders.map((folder) => (
             <option key={folder.id} value={folder.id}>
               {folder.name}
@@ -84,7 +90,6 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
       <div className={styles.formGroup}>
         <label className={styles.label}>カラー</label>
         <div className={styles.colorGroup}>
-          {/* 👇 [修正点1] 「色なし」のラジオボタンを追加 */}
           <div className={styles.colorItem}>
             <input
               type="radio"
@@ -113,7 +118,6 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
       </div>
 
       <div className={styles.actions}>
-        {/* 👇 [修正点2] キャンセルボタンのデザインを変更 */}
         <button type="button" onClick={onClose} className={styles.cancelButton}>
           キャンセル
         </button>

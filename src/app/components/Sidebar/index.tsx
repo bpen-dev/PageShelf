@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { type Folder } from '@/libs/microcms';
+import { type Folder } from '@/utils/microcms';
 import styles from './index.module.css';
 import AuthButton from '../AuthButton';
 import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
