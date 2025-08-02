@@ -51,7 +51,7 @@ PageShelfは、日々のリサーチや学習で出会う情報を、迷わず�
 
 1.  **リポジトリをクローン:**
     ```bash
-    git clone [https://github.com/bpen-dev/pageshelf.git](https://github.com/bpen-dev/pageshelf.git)
+    git clone [https://github.com/bpen-dev/PageShelf.git]
     cd pageshelf
     ```
 
