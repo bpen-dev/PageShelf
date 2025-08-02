@@ -92,7 +92,7 @@ export default function Sidebar({ allFolders }: Props) {
       <nav className={styles.nav}>
         <ul className={styles.list}>
           <li><Link href="/" className={styles.link}><FiHome />すべてのブックマーク</Link></li>
-          <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li>
+          {/* <li><Link href="/folders/unclassified" className={styles.link}><FiArchive />未分類</Link></li> */}
         </ul>
         <hr className={styles.divider} />
         <form onSubmit={handleCreateFolder} className={styles.addFolderForm}>

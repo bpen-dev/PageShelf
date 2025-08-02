@@ -74,3 +74,67 @@ a {
   background-color: var(--background);
   border-top: 1px solid var(--border-color);
 }
+
+/* 👇 [追加] モバイル表示用のスタイル */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none; /* PC用のサイドバーは非表示に */
+  }
+  .fixedHeader, .scrollableArea, .fixedFormArea {
+    padding-left: 1rem; /* スマホ用に左右の余白を調整 */
+    padding-right: 1rem;
+  }
+}
+
+.mobileSidebarOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+.mobileSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100%;
+  background-color: var(--foreground);
+  z-index: 100;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.mobileSidebar.isOpen {
+  transform: translateX(0);
+}
+
+@media (min-width: 769px) {
+  .mobileSidebar, .mobileSidebarOverlay {
+    display: none; /* PC表示では隠す */
+  }
+}
+
+/* 👇 [追記] ローディング画面用のスタイル */
+.loadingScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--background);
+}
+
+.loadingIcon {
+  font-size: 2rem;
+  color: var(--text-secondary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
