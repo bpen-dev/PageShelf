@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { type Folder } from '@/utils/supabase/queries';
 import styles from './index.module.css';
 import AuthButton from '../AuthButton';
-import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus, FiShield, FiSend, FiInfo } from 'react-icons/fi'; 
+import { FiHome, FiArchive, FiFolder, FiEdit2, FiTrash2, FiPlus, FiShield, FiSend, FiInfo, FiFileText } from 'react-icons/fi'; 
 import toast from 'react-hot-toast';
 
 
@@ -122,12 +122,16 @@ export default function Sidebar({ allFolders }: Props) {
 
       {/* 👇 [追加] サイドバーの一番下にリンクエリアを新設 */}
       <div className={styles.footerLinks}>
-        <Link href="/privacy-policy" className={styles.footerLink}>
-          <FiShield size={14} /> プライバシーポリシー
+        <Link href="/terms" className={styles.footerLink}>
+          <FiFileText size={14} /> 利用規約
         </Link>
         <Link href="/about" className={styles.footerLink}>
           <FiInfo size={14} /> このアプリについて
         </Link>
+        <Link href="/privacy-policy" className={styles.footerLink}>
+          <FiShield size={14} /> プライバシーポリシー
+        </Link>
+        
         <Link href="/contact" className={styles.footerLink}>
           <FiSend size={14} /> お問い合わせ
         </Link>
