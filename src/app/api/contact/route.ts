@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server'; // 👈 [重要] server.tsからインポート
 
 export async function POST(request: NextRequest) {
-  // お問い合わせは誰でも送信できるので、ここではサーバークライアントではなく、
-  // 匿名キーを使ったクライアントを一時的に作成します。
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient(); // 👈 [修正点] 引数なしで呼び出す
 
   try {
     const { name, email, message } = await request.json();
@@ -23,8 +18,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) throw error;
-
-    // ここでメール通知などの処理を追加することも可能です
 
     return NextResponse.json({ message: '送信しました' }, { status: 201 });
   } catch (error) {
