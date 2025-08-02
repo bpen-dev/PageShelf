@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function PATCH(
   request: NextRequest, 
-  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 [修正点1]
+  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 修正
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -13,13 +13,13 @@ export async function PATCH(
   }
 
   try {
-    const params = await paramsPromise; // 👈 [修正点2] awaitでparamsを取得
+    const params = await paramsPromise; // 👈 修正
     const contentToUpdate = await request.json();
 
     const { error } = await supabase
       .from('bookmarks')
       .update(contentToUpdate)
-      .eq('id', params.id); // 👈 ここで使うparamsが正しくなる
+      .eq('id', params.id);
 
     if (error) throw error;
 
@@ -32,7 +32,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest, 
-  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 [修正点1]
+  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 修正
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -42,11 +42,11 @@ export async function DELETE(
   }
 
   try {
-    const params = await paramsPromise; // 👈 [修正点2] awaitでparamsを取得
+    const params = await paramsPromise; // 👈 修正
     const { error } = await supabase
       .from('bookmarks')
       .delete()
-      .eq('id', params.id); // 👈 ここで使うparamsが正しくなる
+      .eq('id', params.id);
 
     if (error) throw error;
 

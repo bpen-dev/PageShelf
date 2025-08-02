@@ -7,15 +7,16 @@ import emptyStateStyles from '@/app/empty.module.css';
 import { createClient } from '@/utils/supabase/server';
 
 type Props = {
-  params: {
+  params: Promise<{
     folderId: string;
-  };
+  }>;
 };
 
-export default async function FolderPage({ params }: Props) {
+export default async function FolderPage({ params: paramsPromise }: Props) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const params = await paramsPromise;
   const { folderId } = params;
   const allFolders = await getFolders();
 
@@ -33,7 +34,6 @@ export default async function FolderPage({ params }: Props) {
       : 'ブックマーク';
   
   if (!user) {
-    // 未ログイン時の表示はトップページに任せるので、ここでは何も表示しないか、リダイレクトが適切
     return null;
   }
 
@@ -60,7 +60,8 @@ export default async function FolderPage({ params }: Props) {
       </div>
 
       <div className="fixedFormArea">
-        <BookmarkForm currentFolderId={folderId !== 'unclassified' ? folderId : undefined} />
+        {/* 👇 [修正点] currentFolderIdを渡さないようにする */}
+        <BookmarkForm />
       </div>
     </>
   );

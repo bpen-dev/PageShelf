@@ -13,7 +13,7 @@ type OgpData = {
   favicon: string;
 };
 
-// Propsは不要になります
+// Propsは不要
 export default function BookmarkForm() {
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +70,8 @@ export default function BookmarkForm() {
       body: JSON.stringify({ 
         url: debouncedUrl, 
         title: ogpData.title,
-        description: ''
+        description: '',
+        folder: null // 常に未分類として登録
       }),
     });
 
