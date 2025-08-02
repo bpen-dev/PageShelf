@@ -11,9 +11,9 @@ export default function AboutPage() {
       <div className="scrollableArea">
         <div className={styles.container}>
           <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>Bookmark Appへようこそ！</h2>
+            <h2 className={styles.sectionTitle}>PageShelfへようこそ！</h2>
             <p className={styles.text}>
-              Bookmark Appは、日々の情報収集や学習をより効率的で、楽しいものにするために開発された、<br></br>あなた専用のパーソナル・ブックマーク管理ツールです。<br />
+              PageShelfは、日々の情報収集や学習をより効率的で、楽しいものにするために開発された、<br></br>あなた専用のパーソナル・ブックマーク管理ツールです。<br />
               溢れる情報の中から「あとで読みたい」「これは重要だ」と感じたものを、<br></br>瞬時に、そして美しく整理することができます。
             </p>
           </div>

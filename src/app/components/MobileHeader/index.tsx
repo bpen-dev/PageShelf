@@ -10,7 +10,7 @@ type Props = {
 export default function MobileHeader({ onMenuClick }: Props) {
   return (
     <header className={styles.header}>
-      <div className={styles.logo}>🚀 Bookmark App</div>
+      <div className={styles.logo}>🚀 PageShelf</div>
       <button onClick={onMenuClick} className={styles.menuButton}>
         <FiMenu size={24} />
       </button>

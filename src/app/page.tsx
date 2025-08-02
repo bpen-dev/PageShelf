@@ -18,7 +18,7 @@ export default async function Home() {
     return (
       <div className={landingStyles.landingPage}>
         <header className={landingStyles.header}>
-          <div className={landingStyles.logo}>🚀 Bookmark App</div>
+          <div className={landingStyles.logo}>🚀 PageShelf</div>
           <AuthButton />
         </header>
         <div className={landingStyles.hero}>

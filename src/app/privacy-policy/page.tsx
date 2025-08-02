@@ -9,7 +9,7 @@ export default function PrivacyPolicyPage() {
       <div className="scrollableArea">
         <div className={styles.container}>
           <div className={styles.section}>
-            <p className={styles.preface}>（あなたの名前またはサービス名）（以下、「当サービス」といいます。）は、本ウェブサイト上で提供するサービス（以下、「本サービス」といいます。）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下、「本ポリシー」といいます。）を定めます。</p>
+            <p className={styles.preface}>PageShelf（以下、「当サービス」といいます。）は、本ウェブサイト上で提供するサービス（以下、「本サービス」といいます。）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下、「本ポリシー」といいます。）を定めます。</p>
           </div>
           
           <div className={styles.section}>
