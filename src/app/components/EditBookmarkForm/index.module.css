@@ -123,3 +123,14 @@
 .green { background-color: #48bb78; }
 .yellow { background-color: #f6e05e; }
 .gray { background-color: #a0aec0; }
+
+/* 👇 [追加] 画面幅が480px以下の場合のスタイル */
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column-reverse; /* ボタンを縦に並べ、保存ボタンが一番下に来るように */
+    align-items: stretch; /* ボタンの幅をコンテナいっぱいに広げる */
+  }
+  .button, .cancelButton {
+    justify-content: center; /* ボタン内のテキストを中央揃えに */
+  }
+}
