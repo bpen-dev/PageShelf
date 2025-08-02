@@ -1,32 +1,51 @@
-.title {
+.headerTitle {
   font-size: 1.5rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
-.content {
+.container {
   background-color: var(--foreground);
-  padding: 2rem;
-  /* border-radius: 12px; */
+  padding: 3rem;
+  border-radius: 12px;
   border: 1px solid var(--border-color);
-  margin-top: 1rem;
+  margin: 0 auto; /* 中央寄せ */
 }
 
-.content h2 {
+.section + .section {
+  margin-top: 2.5rem;
+}
+
+.sectionTitle {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-top: 1rem;
   margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
 }
 
-.content p,
-.content li {
+.preface,
+.text,
+.list {
   line-height: 1.8;
   color: var(--text-secondary);
 }
 
-.content ul {
+.preface {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.list {
   padding-left: 1.5rem;
   margin-top: 1rem;
+}
+
+.list li + li {
+  margin-top: 0.5rem;
+}
+
+.dateText {
+  margin-top: 2rem;
+  text-align: right;
+  color: var(--text-secondary);
 }
