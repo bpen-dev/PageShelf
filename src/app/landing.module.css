@@ -62,7 +62,7 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 2rem 2rem;
   border-top: 1px solid var(--border-color);
 }
 
@@ -85,4 +85,22 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+/* 👇 [追加] スマホ画面用のスタイル */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.0rem;
+  }
+  .subtitle {
+    font-size: 1rem;
+  }
+  .features {
+    grid-template-columns: 1fr;
+  }
+  .ctaButton > div > button { /* AuthButtonの中のbuttonを直接指定 */
+  transform: none;
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+}
 }

@@ -97,3 +97,16 @@
 .buttonSecondary:hover {
   background-color: #cbd5e0;
 }
+
+/* 👇 [追加] スマホ画面用のスタイル */
+@media (max-width: 768px) {
+  .headerTitle {
+    font-size: 1.25rem;
+  }
+  .container {
+    padding: 1.5rem;
+  }
+  .featuresGrid {
+    grid-template-columns: 1fr;
+  }
+}
