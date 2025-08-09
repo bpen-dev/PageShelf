@@ -6,16 +6,15 @@ import styles from './index.module.css';
 import { FiPlus, FiLoader } from 'react-icons/fi';
 import Image from 'next/image';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useData } from '@/context/DataContext'; // 👈 [修正点] Contextからデータを取得するためのフックをインポート
+import { useData } from '@/context/DataContext';
 
 type OgpData = {
   title: string;
   favicon: string;
 };
 
-// 修正点: Propsを受け取らないように変更
 export default function BookmarkForm() {
-  const { setBookmarks } = useData(); // 👈 [修正点] ContextからsetBookmarksを取得
+  const { setBookmarks } = useData();
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [ogpData, setOgpData] = useState<OgpData | null>(null);
@@ -71,7 +70,7 @@ export default function BookmarkForm() {
         url: debouncedUrl, 
         title: ogpData.title,
         description: '',
-        folder_id: null
+        folder: null
       }),
     });
 

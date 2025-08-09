@@ -28,26 +28,26 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { url, title: providedTitle, folder: folder_id } = await request.json(); // 👈 folderをfolder_idに変更
+    const { url, title: providedTitle, folder: folder_id } = await request.json();
 
     if (!url || typeof url !== 'string') {
       return NextResponse.json({ error: 'URLが必要です' }, { status: 400 });
     }
 
-    // OGP取得ロジックをPOST APIに統合
     const title = providedTitle || await getTitleFromUrl(url);
 
-    const { error } = await supabase.from('bookmarks').insert({
+    // 修正点: 作成したブックマークの完全なデータを返すように .select() を追加
+    const { data, error } = await supabase.from('bookmarks').insert({
       url,
       title,
       description: '',
-      folder_id, // 👈 ここもfolder_idに
+      folder_id,
       user_id: user.id,
-    });
+    }).select('*, folders (id, name)').single(); // 👈 .single() を使って単一のオブジェクトとして受け取る
 
     if (error) throw error;
 
-    return NextResponse.json({ message: '成功しました' }, { status: 201 });
+    return NextResponse.json(data, { status: 201 }); // 👈 作成したデータを返す
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json({ error: 'ブックマークの作成に失敗しました。' }, { status: 500 });
