@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 
 export async function PATCH(
-  request: NextRequest, 
-  // 修正点: Promiseを削除
-  { params }: { params: { id: string } } 
+  request: NextRequest,
+  // 修正点: Next.jsのルールに合わせて引数の型を修正
+  { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -31,8 +31,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest, 
-  // 修正点: Promiseを削除
+  request: NextRequest,
+  // 修正点: Next.jsのルールに合わせて引数の型を修正
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
@@ -52,6 +52,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (err) {
+    // 修正点: 未使用の変数を削除
     return NextResponse.json({ error: 'ブックマークの削除に失敗しました。' }, { status: 500 });
   }
 }

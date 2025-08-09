@@ -6,7 +6,6 @@ async function checkFolderOwnership(folderId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  // 修正点: 未使用のerror変数を削除
   const { data: folder } = await supabase
     .from('folders')
     .select('user_id')
@@ -38,7 +37,7 @@ export async function PATCH(
       .single();
     if (error) throw error;
     return NextResponse.json(data, { status: 200 });
-  } catch (err) { // 修正点: 'error'が重複しないように変数名を変更
+  } catch (err) {
     return NextResponse.json({ error: 'フォルダの更新に失敗しました。' }, { status: 500 });
   }
 }
