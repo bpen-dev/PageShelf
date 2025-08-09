@@ -3,7 +3,8 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function PATCH(
   request: NextRequest, 
-  { params }: { params: { id: string } }
+  // 修正点: Promiseを削除
+  { params }: { params: { id: string } } 
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -31,6 +32,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest, 
+  // 修正点: Promiseを削除
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();

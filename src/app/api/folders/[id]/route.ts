@@ -6,18 +6,19 @@ async function checkFolderOwnership(folderId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  const { data: folder, error } = await supabase
+  const { data: folder } = await supabase // 修正点: error変数を削除
     .from('folders')
     .select('user_id')
     .eq('id', folderId)
     .single();
     
-  if (error || !folder) return false;
+  if (!folder) return false;
   return folder.user_id === user.id;
 }
 
 export async function PATCH(
   request: NextRequest,
+  // 修正点: Promiseを削除
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
@@ -37,13 +38,14 @@ export async function PATCH(
       .single();
     if (error) throw error;
     return NextResponse.json(data, { status: 200 });
-  } catch (error) {
+  } catch (err) { // 修正点: 'error'が重複しないように変数名を変更
     return NextResponse.json({ error: 'フォルダの更新に失敗しました。' }, { status: 500 });
   }
 }
 
 export async function DELETE(
   request: NextRequest,
+  // 修正点: Promiseを削除
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
