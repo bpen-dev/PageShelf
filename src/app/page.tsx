@@ -37,7 +37,6 @@ export default function Home() {
     );
   }
 
-  // --- ログインしていないユーザー向けの表示 ---
   if (!user) {
     return (
       <div className={landingStyles.landingPage}>
@@ -78,7 +77,6 @@ export default function Home() {
     );
   }
 
-  // --- ログインしているユーザー向けの表示 ---
   return (
     <>
       <div className="fixedHeader">
@@ -93,7 +91,7 @@ export default function Home() {
           </div>
         ) : (
           <div className={styles.listContainer}>
-            {/* 修正点: 不要なpropsを渡さない */}
+            {/* 修正点: allFoldersを渡さない */}
             {(bookmarks || []).map((bookmark) => (
               <BookmarkCard key={bookmark.id} bookmark={bookmark} />
             ))}
@@ -101,7 +99,6 @@ export default function Home() {
         )}
       </div>
       <div className="fixedFormArea">
-        {/* 修正点: 正しいフォームコンポーネントを呼び出す */}
         <BookmarkForm /> 
       </div>
     </>

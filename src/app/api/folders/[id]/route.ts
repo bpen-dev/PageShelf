@@ -6,25 +6,27 @@ async function checkFolderOwnership(folderId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  const { data: folder } = await supabase
+  const { data: folder, error } = await supabase
     .from('folders')
     .select('user_id')
     .eq('id', folderId)
     .single();
     
-  if (!folder) return false;
+  if (error || !folder) return false;
   return folder.user_id === user.id;
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  // 修正点: Next.js 15のルールに従い、paramsをPromiseとして受け取る
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
 
-  const isOwner = await checkFolderOwnership(params.id);
+  const { id } = await params; // 修正点: awaitでデータを取り出す
+  const isOwner = await checkFolderOwnership(id);
   if (!isOwner) return NextResponse.json({ error: '権限がありません' }, { status: 403 });
   
   try {
@@ -32,32 +34,34 @@ export async function PATCH(
     const { data, error } = await supabase
       .from('folders')
       .update({ name })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
     if (error) throw error;
     return NextResponse.json(data, { status: 200 });
-  } catch (err) {
+  } catch (error) {
     return NextResponse.json({ error: 'フォルダの更新に失敗しました。' }, { status: 500 });
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  // 修正点: Next.js 15のルールに従い、paramsをPromiseとして受け取る
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
 
-  const isOwner = await checkFolderOwnership(params.id);
+  const { id } = await params; // 修正点: awaitでデータを取り出す
+  const isOwner = await checkFolderOwnership(id);
   if (!isOwner) return NextResponse.json({ error: '権限がありません' }, { status: 403 });
   
   try {
     const { error } = await supabase
       .from('folders')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
     if (error) throw error;
     return new NextResponse(null, { status: 204 });
   } catch (err) {

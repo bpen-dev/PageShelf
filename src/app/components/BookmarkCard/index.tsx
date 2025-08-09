@@ -10,11 +10,13 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import EditModal from '../EditModal';
 import { useData } from '@/context/DataContext';
 
+// 修正点: allFoldersをPropsから削除
 type Props = {
   bookmark: Bookmark;
 };
 
 export default function BookmarkCard({ bookmark }: Props) {
+  // 修正点: データをすべてContextから取得
   const { allFolders, bookmarks, setBookmarks } = useData();
   const [folderMenuOpen, setFolderMenuOpen] = useState(false);
   const [colorMenuOpen, setColorMenuOpen] = useState(false);
@@ -61,13 +63,14 @@ export default function BookmarkCard({ bookmark }: Props) {
     }
   };
   
-  const handleCopyUrl = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // 修正点: 未使用の引数 'e' を削除
+  const handleCopyUrl = () => {
     navigator.clipboard.writeText(bookmark.url);
     toast.success('URLをコピーしました');
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  // 修正点: 未使用の引数 'e' を削除
+  const handleDelete = async () => {
     if (!window.confirm(`「${bookmark.title}」を削除しますか？`)) {
       return;
     }
@@ -87,8 +90,8 @@ export default function BookmarkCard({ bookmark }: Props) {
     }
   };
 
-  const openEditModal = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // 修正点: 未使用の引数 'e' を削除
+  const openEditModal = () => {
     setIsEditModalOpen(true);
   };
   
@@ -131,7 +134,7 @@ export default function BookmarkCard({ bookmark }: Props) {
               <FiEdit2 />
             </button>
             <div className={styles.menuWrapper} ref={colorMenuRef}>
-              <button onClick={(e) => { e.stopPropagation(); setColorMenuOpen(!colorMenuOpen); }} className={styles.actionButton} title="カラーを変更">
+              <button onClick={() => setColorMenuOpen(!colorMenuOpen)} className={styles.actionButton} title="カラーを変更">
                 <div className={`${styles.colorIndicator} ${styles[bookmark.color || 'noColor']}`}></div>
               </button>
               {colorMenuOpen && (
@@ -151,7 +154,7 @@ export default function BookmarkCard({ bookmark }: Props) {
               )}
             </div>
             <div className={styles.menuWrapper} ref={folderMenuRef}>
-              <button onClick={(e) => { e.stopPropagation(); setFolderMenuOpen(!folderMenuOpen); }} className={styles.actionButton} title="フォルダを移動">
+              <button onClick={() => setFolderMenuOpen(!folderMenuOpen)} className={styles.actionButton} title="フォルダを移動">
                 <FolderIcon />
               </button>
               {folderMenuOpen && (
@@ -180,7 +183,6 @@ export default function BookmarkCard({ bookmark }: Props) {
         </div>
       </article>
       {isEditModalOpen && (
-        // 修正点: 不要なpropsを渡さない
         <EditModal 
           bookmark={bookmark} 
           onClose={() => setIsEditModalOpen(false)} 

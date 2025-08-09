@@ -1,4 +1,4 @@
-import { getBookmarksByFolder, getUnclassifiedBookmarks, getFolders, type Bookmark } from '@/utils/supabase/queries';
+import { getBookmarksByFolder, getUnclassifiedBookmarks, getFolders } from '@/utils/supabase/queries';
 import BookmarkCard from '@/app/components/BookmarkCard';
 import styles from '@/app/page.module.css';
 import BookmarkForm from '@/app/components/BookmarkForm';
@@ -6,17 +6,20 @@ import { FiInbox } from 'react-icons/fi';
 import emptyStateStyles from '@/app/empty.module.css';
 import { createClient } from '@/utils/supabase/server';
 
+// 修正点: Next.js 15の仕様に合わせて、paramsをPromiseとして受け取る
 type Props = {
-  params: {
+  params: Promise<{
     folderId: string;
-  };
+  }>;
 };
 
-export default async function FolderPage({ params }: Props) {
+// 修正点: async をつけ、propsの受け取り方を変更
+export default async function FolderPage({ params: paramsPromise }: Props) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { folderId } = params;
+  // 修正点: awaitでデータを取り出す
+  const { folderId } = await paramsPromise;
   const allFolders = await getFolders();
 
   const bookmarks =
