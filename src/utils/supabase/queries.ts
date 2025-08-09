@@ -14,12 +14,12 @@ export type Bookmark = {
   created_at: string;
   url: string;
   title: string;
-  description?: string;
-  color?: string; // 👈 [修正点] 配列(string[])から、ただのstringに変更
+  description?: string | null; // 👈 nullを許容
+  color?: string | null;       // 👈 nullを許容
   is_favorite?: boolean;
   user_id: string;
-  folder_id?: number;
-  folders?: Folder;
+  folder_id?: number | null;   // 👈 nullを許容するように変更
+  folders?: Folder | null;     // 👈 nullを許容するように変更
 };
 
 // --- これ以降の関数は変更なし ---

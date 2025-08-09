@@ -1,5 +1,5 @@
 import { createBrowserClient } from '@supabase/ssr';
-import { Session, User } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 
 // --- 型定義 ---
 export type Folder = {
@@ -14,17 +14,16 @@ export type Bookmark = {
   created_at: string;
   url: string;
   title: string;
-  description?: string;
-  color?: string;
+  description?: string | null; // 👈 nullを許容
+  color?: string | null;       // 👈 nullを許容
   is_favorite?: boolean;
   user_id: string;
-  folder_id?: number;
-  folders?: Folder; // フォルダ情報をJOINした時のため
+  folder_id?: number | null;   // 👈 nullを許容するように変更
+  folders?: Folder | null;     // 👈 nullを許容するように変更
 };
 
 
 // --- ブラウザ用クライアント ---
-// (これは変更なし)
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;

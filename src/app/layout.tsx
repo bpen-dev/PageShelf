@@ -6,21 +6,18 @@ import Sidebar from "./components/Sidebar";
 import { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import type { Folder } from "@/utils/supabase/queries";
 import MobileHeader from "./components/MobileHeader";
 import { FiLoader } from "react-icons/fi";
-import { useRouter } from "next/navigation"; // 👈 useRouterをインポート
-import GoogleAnalytics from "./components/GoogleAnalytics"; // 👈 GAをインポート
-import { Suspense } from "react"; // 👈 Suspenseをインポート
+import { useRouter } from "next/navigation";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+import { Suspense } from "react";
+import { DataProvider, useData } from "@/context/DataContext"; // 👈 Contextをインポート
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const [allFolders, setAllFolders] = useState<Folder[]>([]);
+// ログイン状態に応じてUIを管理するコンポーネント
+function AppContent({ children }: { children: React.ReactNode }) {
+  const { setAllFolders, setBookmarks } = useData(); // 👈 Contextから更新関数を取得
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,90 +26,98 @@ export default function RootLayout({
   useEffect(() => {
     const supabase = createClient();
     
-    // 最初に一度だけ、現在のセッションを確認する
-    const checkInitialSession = async () => {
+    // データを取得する関数
+    const fetchData = async () => {
+      const { data: foldersData } = await supabase.from('folders').select('*').order('created_at', { ascending: true });
+      const { data: bookmarksData } = await supabase.from('bookmarks').select('*, folders(id, name)').order('created_at', { ascending: false });
+      setAllFolders(foldersData || []);
+      setBookmarks(bookmarksData || []);
+    };
+
+    // ログイン状態を確認する関数
+    const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const userIsLoggedIn = !!session;
       setIsLoggedIn(userIsLoggedIn);
 
       if (userIsLoggedIn) {
-        const { data: folders } = await supabase.from('folders').select('*');
-        setAllFolders(folders || []);
+        await fetchData();
       }
-      setIsLoading(false); // 確認が終わったらローディングを解除
+      setIsLoading(false);
     };
 
-    checkInitialSession();
+    checkSession();
 
-    // ログイン状態の変化を監視する
+    // ログイン状態の変化を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const userIsLoggedIn = !!session;
       setIsLoggedIn(userIsLoggedIn);
       
-      if (!userIsLoggedIn) {
-        setAllFolders([]);
+      if (userIsLoggedIn) {
+        fetchData(); // ログインしたらデータを取得
+      } else {
+        setAllFolders([]); // ログアウトしたらデータをクリア
+        setBookmarks([]);
+        router.push('/'); // ランディングページに戻る
       }
-      // ログイン状態が変化したら、サーバー側の情報と同期するためにリフレッシュ
-      router.refresh();
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [router]); // 依存配列をrouterに変更
+  }, [router, setAllFolders, setBookmarks]);
 
   if (isLoading) {
     return (
-      <html lang="ja">
-        <body className={inter.className}>
-          <div className="loadingScreen">
-            <FiLoader className="loadingIcon" />
-          </div>
-        </body>
-      </html>
+      <div className="loadingScreen">
+        <FiLoader className="loadingIcon" />
+      </div>
     );
   }
 
   if (isLoggedIn) {
-    // --- ログインしているユーザー向けのレイアウト ---
     return (
-      <html lang="ja">
-        <body className={inter.className}>
-          <Suspense>
-          <GoogleAnalytics />
-          </Suspense>
-          <Toaster position="top-center" reverseOrder={false} />
-          <div className="container">
-            <aside className="sidebar">
-              <Sidebar allFolders={allFolders} />
-            </aside>
-            {isMobileMenuOpen && (
-              <div 
-                className="mobileSidebarOverlay" 
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-            )}
-            <div className={`mobileSidebar ${isMobileMenuOpen ? 'isOpen' : ''}`}>
-              <Sidebar allFolders={allFolders} />
-            </div>
-            <main className="mainContent">
-              <MobileHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
-              {children}
-            </main>
-          </div>
-        </body>
-      </html>
+      <div className="container">
+        <aside className="sidebar">
+          <Sidebar />
+        </aside>
+        {isMobileMenuOpen && (
+          <div 
+            className="mobileSidebarOverlay" 
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+        <div className={`mobileSidebar ${isMobileMenuOpen ? 'isOpen' : ''}`}>
+          <Sidebar />
+        </div>
+        <main className="mainContent">
+          <MobileHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
+          {children}
+        </main>
+      </div>
     );
   }
 
-  // --- ログインしていないユーザー向けのレイアウト ---
+  return <>{children}</>;
+}
+
+// アプリケーション全体のエントリーポイント
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="ja">
       <body className={inter.className}>
+        <Suspense>
+          <GoogleAnalytics />
+        </Suspense>
         <Toaster position="top-center" reverseOrder={false} />
-        <main>
-          {children}
-        </main>
+        {/* DataProviderで全体をラップ */}
+        <DataProvider>
+          <AppContent>{children}</AppContent>
+        </DataProvider>
       </body>
     </html>
   );
