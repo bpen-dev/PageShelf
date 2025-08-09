@@ -6,7 +6,8 @@ async function checkFolderOwnership(folderId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return false;
 
-  const { data: folder } = await supabase // 修正点: error変数を削除
+  // 修正点: 未使用のerror変数を削除
+  const { data: folder } = await supabase
     .from('folders')
     .select('user_id')
     .eq('id', folderId)
@@ -18,7 +19,6 @@ async function checkFolderOwnership(folderId: string) {
 
 export async function PATCH(
   request: NextRequest,
-  // 修正点: Promiseを削除
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
@@ -45,7 +45,6 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  // 修正点: Promiseを削除
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
@@ -62,7 +61,7 @@ export async function DELETE(
       .eq('id', params.id);
     if (error) throw error;
     return new NextResponse(null, { status: 204 });
-  } catch (err) { // 修正点: 'error'が重複しないように変数名を変更
+  } catch (err) {
     console.error('Delete Folder API Error:', err);
     return NextResponse.json({ error: 'フォルダの削除に失敗しました。' }, { status: 500 });
   }

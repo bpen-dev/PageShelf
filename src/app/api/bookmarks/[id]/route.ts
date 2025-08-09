@@ -51,7 +51,7 @@ export async function DELETE(
     if (error) throw error;
 
     return new NextResponse(null, { status: 204 });
-  } catch (err) { // 修正点: 'error'が重複しないように変数名を変更
+  } catch (err) {
     return NextResponse.json({ error: 'ブックマークの削除に失敗しました。' }, { status: 500 });
   }
 }
