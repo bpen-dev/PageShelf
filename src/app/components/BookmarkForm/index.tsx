@@ -1,24 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import styles from './index.module.css';
 import { FiPlus, FiLoader } from 'react-icons/fi';
 import Image from 'next/image';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useData } from '@/context/DataContext'; // 👈 [修正点] Contextからデータを取得するためのフックをインポート
 
 type OgpData = {
   title: string;
   favicon: string;
 };
 
-// Propsは不要
+// 修正点: Propsを受け取らないように変更
 export default function BookmarkForm() {
+  const { setBookmarks } = useData(); // 👈 [修正点] ContextからsetBookmarksを取得
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [ogpData, setOgpData] = useState<OgpData | null>(null);
-  const router = useRouter();
   const debouncedUrl = useDebounce(url, 500);
 
   useEffect(() => {
@@ -71,17 +71,19 @@ export default function BookmarkForm() {
         url: debouncedUrl, 
         title: ogpData.title,
         description: '',
-        folder: null // 常に未分類として登録
+        folder_id: null
       }),
     });
 
     setIsLoading(false);
 
     if (response.ok) {
+      const newBookmark = await response.json();
+      // 修正点: router.refresh()の代わりに、stateを直接更新する
+      setBookmarks(prev => [newBookmark, ...prev]);
       toast.success('ブックマークを追加しました！');
       setUrl('');
       setOgpData(null);
-      router.refresh();
     } else {
       const errorData = await response.json();
       toast.error(errorData.error || '登録に失敗しました。');

@@ -1,19 +1,43 @@
-import { getBookmarks, getFolders, type Bookmark } from '@/utils/supabase/queries';
+'use client';
+
+import { useData } from '@/context/DataContext';
 import BookmarkCard from './components/BookmarkCard';
 import styles from './page.module.css';
 import BookmarkForm from './components/BookmarkForm';
-import { FiInbox } from 'react-icons/fi';
+import { FiInbox, FiLoader } from 'react-icons/fi';
 import emptyStateStyles from '@/app/empty.module.css';
-import { createClient } from '@/utils/supabase/server';
 import AuthButton from './components/AuthButton';
 import landingStyles from './landing.module.css';
-import { FiLayers, FiZap, FiBox } from 'react-icons/fi'; // 👈 特徴紹介用のアイコンをインポート
+import { FiLayers, FiZap, FiBox } from 'react-icons/fi';
+import { createClient } from '@/utils/supabase/client';
+import { useEffect, useState } from 'react';
+import { User } from '@supabase/supabase-js';
 
-export default async function Home() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export default function Home() {
+  const { bookmarks } = useData();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // --- ログインしていないユーザー向けの表示 (ランディングページ) ---
+  // ログイン状態をクライアントサイドで確認
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setIsLoading(false);
+    };
+    checkUser();
+  }, []);
+
+  if (isLoading) {
+    return (
+        <div className="loadingScreen">
+            <FiLoader className="loadingIcon" />
+        </div>
+    );
+  }
+
+  // --- ログインしていないユーザー向けの表示 ---
   if (!user) {
     return (
       <div className={landingStyles.landingPage}>
@@ -54,17 +78,14 @@ export default async function Home() {
     );
   }
 
-  // --- ログインしているユーザー向けの表示 (メインアプリ画面) ---
-  const bookmarks = await getBookmarks();
-  const allFolders = await getFolders();
-
+  // --- ログインしているユーザー向けの表示 ---
   return (
     <>
       <div className="fixedHeader">
         <h1 className={styles.headerTitle}>すべてのブックマーク</h1>
       </div>
       <div className="scrollableArea">
-        {bookmarks.length === 0 ? (
+        {(bookmarks || []).length === 0 ? (
           <div className={emptyStateStyles.emptyState}>
             <FiInbox size={48} className={emptyStateStyles.icon} />
             <h2 className={emptyStateStyles.title}>まだブックマークがありません</h2>
@@ -72,13 +93,15 @@ export default async function Home() {
           </div>
         ) : (
           <div className={styles.listContainer}>
-            {bookmarks.map((bookmark) => (
-              <BookmarkCard key={bookmark.id} bookmark={bookmark} allFolders={allFolders} />
+            {/* 修正点: 不要なpropsを渡さない */}
+            {(bookmarks || []).map((bookmark) => (
+              <BookmarkCard key={bookmark.id} bookmark={bookmark} />
             ))}
           </div>
         )}
       </div>
       <div className="fixedFormArea">
+        {/* 修正点: 正しいフォームコンポーネントを呼び出す */}
         <BookmarkForm /> 
       </div>
     </>

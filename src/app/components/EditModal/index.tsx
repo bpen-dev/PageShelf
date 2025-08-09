@@ -1,19 +1,18 @@
 'use client';
 
-import { type Bookmark, type Folder } from '@/utils/supabase/queries';
+import { type Bookmark } from '@/utils/supabase/queries';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import EditBookmarkForm from '../EditBookmarkForm';
 import styles from './index.module.css';
 import { FiX } from 'react-icons/fi';
 
+// 修正点: allFoldersを受け取らない
 type Props = {
   bookmark: Bookmark;
-  allFolders: Folder[];
-  onClose: () => void; // モーダルを閉じるための関数
+  onClose: () => void;
 };
 
-export default function EditModal({ bookmark, allFolders, onClose }: Props) {
-  // モーダルの外側をクリックしたら閉じる
+export default function EditModal({ bookmark, onClose }: Props) {
   const modalRef = useClickOutside<HTMLDivElement>(onClose);
 
   return (
@@ -26,11 +25,10 @@ export default function EditModal({ bookmark, allFolders, onClose }: Props) {
           </button>
         </div>
         <div className={styles.content}>
-          {/* 編集フォームをモーダルの中に配置 */}
+          {/* 修正点: 不要なpropsを渡さない */}
           <EditBookmarkForm 
             bookmark={bookmark} 
-            allFolders={allFolders}
-            onClose={onClose} // フォーム側にも閉じる関数を渡す
+            onClose={onClose}
           />
         </div>
       </div>

@@ -1,44 +1,55 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { type Bookmark, type Folder } from '@/utils/supabase/queries';
+import { type Bookmark } from '@/utils/supabase/queries';
 import styles from './index.module.css';
 import toast from 'react-hot-toast';
+import { useData } from '@/context/DataContext';
 
+// 修正点: allFoldersを受け取らない
 type Props = {
   bookmark: Bookmark;
-  allFolders: Folder[];
   onClose: () => void;
 };
 
-export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Props) {
+export default function EditBookmarkForm({ bookmark, onClose }: Props) {
+  const { allFolders, setBookmarks } = useData();
   const [url, setUrl] = useState(bookmark.url);
   const [title, setTitle] = useState(bookmark.title);
   const [description, setDescription] = useState(bookmark.description || '');
   const [selectedFolder, setSelectedFolder] = useState(bookmark.folder_id?.toString() || '');
-  const [color, setColor] = useState(bookmark.color || ''); // 👈 [修正点] 配列([])ではなく、文字列('')を初期値に
+  const [color, setColor] = useState(bookmark.color || '');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await fetch(`/api/bookmarks/${bookmark.id}`, {
+    
+    const folderIdAsNumber = selectedFolder ? parseInt(selectedFolder, 10) : null;
+
+    const updatedContent = { 
+      url, 
+      title, 
+      description, 
+      folder_id: folderIdAsNumber, 
+      color: color || null
+    };
+
+    const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        url, 
-        title, 
-        description, 
-        folder_id: selectedFolder || null, 
-        color: color || null // 👈 [修正点] 文字列をそのまま送る
-      }),
+      body: JSON.stringify(updatedContent),
     });
+
     setIsLoading(false);
-    toast.success('更新しました');
-    onClose();
-    router.refresh();
+
+    if (res.ok) {
+      setBookmarks(prev => prev.map(b => b.id === bookmark.id ? { ...b, ...updatedContent, folders: (allFolders || []).find(f => f.id === folderIdAsNumber) } : b));
+      toast.success('更新しました');
+      onClose();
+    } else {
+      toast.error('更新に失敗しました');
+    }
   };
   
   const handleDelete = async () => {
@@ -46,13 +57,20 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
       return;
     }
     setIsLoading(true);
-    await fetch(`/api/bookmarks/${bookmark.id}`, {
+
+    const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'DELETE',
     });
+    
     setIsLoading(false);
-    toast.success('削除しました');
-    onClose();
-    router.refresh();
+
+    if (res.ok) {
+      setBookmarks(prev => prev.filter(b => b.id !== bookmark.id));
+      toast.success('削除しました');
+      onClose();
+    } else {
+      toast.error('削除に失敗しました');
+    }
   };
 
   return (
@@ -67,7 +85,7 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
       </div>
       <div className={styles.formGroup}>
         <label htmlFor="description" className={styles.label}>メモ</label>
-        <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
+        <textarea id="description" value={description || ''} onChange={(e) => setDescription(e.target.value)} className={styles.textarea} />
       </div>
       <div className={styles.formGroup}>
         <label htmlFor="folder" className={styles.label}>フォルダ</label>
@@ -78,7 +96,7 @@ export default function EditBookmarkForm({ bookmark, allFolders, onClose }: Prop
           className={styles.input}
         >
           <option value="">未分類</option>
-          {allFolders.map((folder) => (
+          {(allFolders || []).map((folder) => (
             <option key={folder.id} value={folder.id}>
               {folder.name}
             </option>

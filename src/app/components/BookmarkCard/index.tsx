@@ -1,22 +1,21 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import styles from './index.module.css';
 import { type Bookmark, type Folder } from '@/utils/supabase/queries';
-import { FiExternalLink, FiEdit2, FiCopy, FiTrash2, FiFolder as FolderIcon } from 'react-icons/fi';
+import { FiEdit2, FiCopy, FiTrash2, FiFolder as FolderIcon } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import EditModal from '../EditModal';
+import { useData } from '@/context/DataContext';
 
 type Props = {
   bookmark: Bookmark;
-  allFolders: Folder[];
 };
 
-export default function BookmarkCard({ bookmark, allFolders }: Props) {
-  const router = useRouter();
+export default function BookmarkCard({ bookmark }: Props) {
+  const { allFolders, bookmarks, setBookmarks } = useData();
   const [folderMenuOpen, setFolderMenuOpen] = useState(false);
   const [colorMenuOpen, setColorMenuOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -25,25 +24,41 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
   const colorMenuRef = useClickOutside<HTMLDivElement>(() => setColorMenuOpen(false));
 
   const handleFolderChange = async (newFolder: Folder | null) => {
-    await fetch(`/api/bookmarks/${bookmark.id}`, {
+    const originalBookmarks = bookmarks;
+    setBookmarks(prev => prev.map(b => b.id === bookmark.id ? { ...b, folder_id: newFolder?.id ?? null, folders: newFolder } : b));
+    setFolderMenuOpen(false);
+
+    const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ folder_id: newFolder ? newFolder.id : null }),
     });
-    setFolderMenuOpen(false);
-    toast.success(`「${newFolder ? newFolder.name : '未分類'}」に移動しました`);
-    router.refresh();
+    
+    if (res.ok) {
+      toast.success(`「${newFolder ? newFolder.name : '未分類'}」に移動しました`);
+    } else {
+      toast.error('移動に失敗しました');
+      setBookmarks(originalBookmarks);
+    }
   };
 
   const handleColorChange = async (newColor: string | null) => {
-    await fetch(`/api/bookmarks/${bookmark.id}`, {
+    const originalBookmarks = bookmarks;
+    setBookmarks(prev => prev.map(b => b.id === bookmark.id ? { ...b, color: newColor } : b));
+    setColorMenuOpen(false);
+
+    const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ color: newColor }),
     });
-    setColorMenuOpen(false);
-    toast.success('カラーを変更しました');
-    router.refresh();
+    
+    if (res.ok) {
+      toast.success('カラーを変更しました');
+    } else {
+      toast.error('カラーの変更に失敗しました');
+      setBookmarks(originalBookmarks);
+    }
   };
   
   const handleCopyUrl = (e: React.MouseEvent) => {
@@ -53,15 +68,23 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
     if (!window.confirm(`「${bookmark.title}」を削除しますか？`)) {
       return;
     }
-    await fetch(`/api/bookmarks/${bookmark.id}`, {
+    
+    const originalBookmarks = bookmarks;
+    setBookmarks(prev => prev.filter(b => b.id !== bookmark.id));
+
+    const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
       method: 'DELETE',
     });
-    toast.success('削除しました');
-    router.refresh();
+
+    if (res.ok) {
+      toast.success('削除しました');
+    } else {
+      toast.error('削除に失敗しました');
+      setBookmarks(originalBookmarks);
+    }
   };
 
   const openEditModal = (e: React.MouseEvent) => {
@@ -74,7 +97,6 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
 
   return (
     <>
-      {/* 👇 [修正点] bookmark.color[0] ではなく、bookmark.color を直接使う */}
       <article className={`${styles.card} ${styles[bookmark.color || 'default']} ${isAnyMenuOpen ? styles.activeCard : ''}`}>
         <a href={bookmark.url} target="_blank" rel="noopener noreferrer" className={styles.mainLink}>
           <div className={styles.faviconContainer}>
@@ -110,7 +132,6 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
             </button>
             <div className={styles.menuWrapper} ref={colorMenuRef}>
               <button onClick={(e) => { e.stopPropagation(); setColorMenuOpen(!colorMenuOpen); }} className={styles.actionButton} title="カラーを変更">
-                {/* 👇 [修正点] bookmark.color[0] ではなく、bookmark.color を直接使う */}
                 <div className={`${styles.colorIndicator} ${styles[bookmark.color || 'noColor']}`}></div>
               </button>
               {colorMenuOpen && (
@@ -139,7 +160,7 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
                     <li onClick={() => handleFolderChange(null)} className={styles.dropdownItem}>
                       未分類にする
                     </li>
-                    {allFolders.map((folder) => (
+                    {(allFolders || []).map((folder) => (
                       <li
                         key={folder.id}
                         onClick={() => handleFolderChange(folder)}
@@ -159,9 +180,9 @@ export default function BookmarkCard({ bookmark, allFolders }: Props) {
         </div>
       </article>
       {isEditModalOpen && (
+        // 修正点: 不要なpropsを渡さない
         <EditModal 
           bookmark={bookmark} 
-          allFolders={allFolders} 
           onClose={() => setIsEditModalOpen(false)} 
         />
       )}
