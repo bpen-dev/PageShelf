@@ -18,13 +18,12 @@ async function checkFolderOwnership(folderId: string) {
 
 export async function PATCH(
   request: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 修正
+  { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
 
-  const params = await paramsPromise; // 👈 修正
   const isOwner = await checkFolderOwnership(params.id);
   if (!isOwner) return NextResponse.json({ error: '権限がありません' }, { status: 403 });
   
@@ -45,13 +44,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 修正
+  { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'ログインが必要です' }, { status: 401 });
 
-  const params = await paramsPromise; // 👈 修正
   const isOwner = await checkFolderOwnership(params.id);
   if (!isOwner) return NextResponse.json({ error: '権限がありません' }, { status: 403 });
   
@@ -62,8 +60,8 @@ export async function DELETE(
       .eq('id', params.id);
     if (error) throw error;
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    console.error('Delete Folder API Error:', error);
+  } catch (err) { // 修正点: 'error'が重複しないように変数名を変更
+    console.error('Delete Folder API Error:', err);
     return NextResponse.json({ error: 'フォルダの削除に失敗しました。' }, { status: 500 });
   }
 }

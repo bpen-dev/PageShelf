@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function PATCH(
   request: NextRequest, 
-  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 修正
+  { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -13,7 +13,6 @@ export async function PATCH(
   }
 
   try {
-    const params = await paramsPromise; // 👈 修正
     const contentToUpdate = await request.json();
 
     const { error } = await supabase
@@ -32,7 +31,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest, 
-  { params: paramsPromise }: { params: Promise<{ id: string }> } // 👈 修正
+  { params }: { params: { id: string } }
 ) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -42,7 +41,6 @@ export async function DELETE(
   }
 
   try {
-    const params = await paramsPromise; // 👈 修正
     const { error } = await supabase
       .from('bookmarks')
       .delete()
@@ -51,7 +49,7 @@ export async function DELETE(
     if (error) throw error;
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
+  } catch (err) { // 修正点: 'error'が重複しないように変数名を変更
     return NextResponse.json({ error: 'ブックマークの削除に失敗しました。' }, { status: 500 });
   }
 }

@@ -1,12 +1,10 @@
-'use client';
-
-import { useMemo } from 'react';
-import { useData } from '@/context/DataContext';
+import { getBookmarksByFolder, getUnclassifiedBookmarks, getFolders, type Bookmark } from '@/utils/supabase/queries';
 import BookmarkCard from '@/app/components/BookmarkCard';
 import styles from '@/app/page.module.css';
 import BookmarkForm from '@/app/components/BookmarkForm';
 import { FiInbox } from 'react-icons/fi';
 import emptyStateStyles from '@/app/empty.module.css';
+import { createClient } from '@/utils/supabase/server';
 
 type Props = {
   params: {
@@ -14,25 +12,29 @@ type Props = {
   };
 };
 
-export default function FolderPage({ params }: Props) {
+export default async function FolderPage({ params }: Props) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { folderId } = params;
-  const { allFolders, bookmarks: allBookmarks } = useData(); 
+  const allFolders = await getFolders();
 
-  const bookmarks = useMemo(() => {
-    if (!allBookmarks) return [];
-    if (folderId === 'unclassified') {
-      return allBookmarks.filter(b => !b.folder_id);
-    }
-    return allBookmarks.filter(b => b.folder_id?.toString() === folderId);
-  }, [folderId, allBookmarks]);
+  const bookmarks =
+    folderId === 'unclassified'
+      ? await getUnclassifiedBookmarks()
+      : await getBookmarksByFolder(folderId);
 
-  const currentFolder = (allFolders || []).find(folder => folder.id.toString() === folderId);
+  const currentFolder = allFolders.find(folder => folder.id.toString() === folderId);
   const title = 
     folderId === 'unclassified'
       ? '未分類'
       : currentFolder
       ? currentFolder.name
       : 'ブックマーク';
+  
+  if (!user) {
+    return null;
+  }
 
   return (
     <>
@@ -49,7 +51,7 @@ export default function FolderPage({ params }: Props) {
           </div>
         ) : (
           <div className={styles.listContainer}>
-            {/* 修正点: 不要なpropsを渡さない */}
+            {/* 修正点: allFoldersを渡さないように変更 */}
             {bookmarks.map((bookmark) => (
               <BookmarkCard key={bookmark.id} bookmark={bookmark} />
             ))}
@@ -58,7 +60,6 @@ export default function FolderPage({ params }: Props) {
       </div>
 
       <div className="fixedFormArea">
-        {/* 修正点: 正しいフォームコンポーネントを呼び出す */}
         <BookmarkForm />
       </div>
     </>
